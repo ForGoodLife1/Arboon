@@ -24,7 +24,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique();
 
         builder.Property(u => u.PasswordHash)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(255);
+
+        builder.Property(u => u.Role)
+            .IsRequired()
+            .HasMaxLength(20)
+            .HasDefaultValue("Seller");
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();

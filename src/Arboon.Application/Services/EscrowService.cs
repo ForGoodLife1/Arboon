@@ -15,6 +15,7 @@ public class EscrowService : IEscrowService
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
     private readonly IPaymentService _paymentService;
+    private readonly IWebhookService _webhookService;
     private readonly ILogger<EscrowService> _logger;
     private readonly string _baseUrl;
 
@@ -23,6 +24,7 @@ public class EscrowService : IEscrowService
         IMapper mapper,
         IEmailService emailService,
         IPaymentService paymentService,
+        IWebhookService webhookService,
         ILogger<EscrowService> logger,
         IConfiguration configuration)
     {
@@ -30,6 +32,7 @@ public class EscrowService : IEscrowService
         _mapper = mapper;
         _emailService = emailService;
         _paymentService = paymentService;
+        _webhookService = webhookService;
         _logger = logger;
         _baseUrl = configuration["AppSettings:BaseUrl"] ?? "https://arboon.app";
     }
@@ -53,6 +56,8 @@ public class EscrowService : IEscrowService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Escrow {EscrowId} created by seller {SellerId}", escrow.Id, sellerId);
+
+        await DispatchEscrowWebhook("escrow.created", escrow);
 
         // Load seller for mapping
         var result = await _context.Escrows
@@ -135,6 +140,8 @@ public class EscrowService : IEscrowService
 
         _logger.LogInformation("Escrow {EscrowId} paid by {BuyerEmail}", escrowId, dto.BuyerEmail);
 
+        await DispatchEscrowWebhook("escrow.funded", escrow);
+
         return new
         {
             status = "FROZEN",
@@ -179,6 +186,8 @@ public class EscrowService : IEscrowService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Escrow {EscrowId} released", escrowId);
+
+        await DispatchEscrowWebhook("escrow.released", escrow);
 
         return new
         {
@@ -225,5 +234,22 @@ public class EscrowService : IEscrowService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Escrow {EscrowId} cancelled by seller {SellerId}", escrowId, sellerId);
+
+        await DispatchEscrowWebhook("escrow.cancelled", escrow);
+    }
+
+    private async Task DispatchEscrowWebhook(string eventName, Escrow escrow)
+    {
+        var payload = new
+        {
+            escrow_id = escrow.Id,
+            title = escrow.Title,
+            amount = escrow.Amount,
+            currency = escrow.Currency,
+            status = escrow.Status.ToString(),
+            buyer_email = escrow.BuyerEmail
+        };
+
+        await _webhookService.DispatchAsync(eventName, escrow.Id, payload);
     }
 }

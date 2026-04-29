@@ -59,7 +59,38 @@ curl -X POST https://localhost:5001/api/v1/escrows \
     "currency": "USD",
     "buyerEmail": "buyer@example.com",
     "conditions": "تسليم الموقع خلال 10 أيام"
-  }'
+### 3. Escrows (`/api/v1/escrows`)
+- `POST /` - Create new escrow (Seller)
+- `GET /` - List escrows (Seller)
+- `GET /{id}` - Get escrow details (Seller/Buyer)
+- `POST /{id}/pay` - Process payment (Buyer)
+- `POST /{id}/release` - Confirm delivery and release funds (Buyer)
+- `POST /{id}/cancel` - Cancel pending escrow (Seller)
+
+### 4. Webhooks (`/api/v1/webhooks`)
+- `POST /` - Register new webhook endpoint (Seller)
+- `GET /` - List registered endpoints (Seller)
+- `DELETE /{id}` - Delete endpoint (Seller)
+- `GET /deliveries` - List webhook delivery history (Seller)
+- `GET /deliveries/{id}` - Get webhook delivery payload/response details (Seller)
+- `POST /deliveries/{id}/retry` - Manually retry a failed delivery (Seller)
+
+### 5. Disputes (`/api/v1/disputes`)
+- `POST /` - Open a dispute (Seller)
+- `GET /` - List all your disputes (Seller)
+- `POST /buyer` - Open a dispute using a Magic Link token (Buyer)
+- `POST /{id}/messages` - Add message to dispute (Seller/Buyer)
+- `GET /{id}/messages` - List dispute messages (Seller/Buyer)
+
+### 6. Admin Disputes (`/api/v1/admin/disputes`)
+- `GET /` - List all open disputes across platform (Admin)
+- `GET /{id}` - Get complete dispute details (Admin)
+- `POST /{id}/resolve` - Resolve a dispute (Admin)
+- `POST /{id}/messages` - Add admin message to dispute (Admin)lopment mode, the email containing the Magic Link is logged to the console.
+```bash
+curl -X POST https://localhost:5001/api/v1/escrows/YOUR_ESCROW_ID/pay \
+  -H "Content-Type: application/json" \
+  -d '{"cardToken": "tok_visa"}'
 ```
 *(Copy the `id` of the created escrow)*
 

@@ -18,11 +18,31 @@ public class PaymentService : IPaymentService
 
     public Task<bool> ProcessPaymentAsync(string cardToken, decimal amount, string currency)
     {
-        _logger.LogInformation(
-            "💳 [MOCK] Processing payment: {Amount} {Currency} with card token {CardToken}",
+        _logger.LogInformation("Simulating payment of {Amount} {Currency} using token {CardToken}",
             amount, currency, cardToken);
 
-        // Mock: always succeeds
+        // Simulate network delay
+        Thread.Sleep(1000);
+
+        // Always succeed in MVP simulation unless token is specific
+        bool success = cardToken != "tok_fail";
+
+        if (success)
+            _logger.LogInformation("Payment successful.");
+        else
+            _logger.LogWarning("Payment failed (simulated).");
+
+        return Task.FromResult(success);
+    }
+
+    public Task<bool> ProcessRefundAsync(string escrowId, decimal amount, string currency)
+    {
+        _logger.LogInformation("Simulating REFUND of {Amount} {Currency} for escrow {EscrowId}",
+            amount, currency, escrowId);
+
+        // Simulate network delay
+        Thread.Sleep(500);
+
         return Task.FromResult(true);
     }
 }

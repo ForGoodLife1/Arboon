@@ -15,4 +15,7 @@ public static class ErrorCodes
     public const string InternalError = "INTERNAL_ERROR";
     public const string UserAlreadyExists = "USER_ALREADY_EXISTS";
     public const string InvalidCredentials = "INVALID_CREDENTIALS";
+    public const string DisputeNotFound = "DISPUTE_NOT_FOUND";
+    public const string ActiveDisputeExists = "ACTIVE_DISPUTE_EXISTS";
+    public const string WebhookEndpointNotFound = "WEBHOOK_ENDPOINT_NOT_FOUND";
 }

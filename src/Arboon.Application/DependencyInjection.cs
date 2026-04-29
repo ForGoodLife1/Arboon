@@ -22,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IEscrowService, EscrowService>();
         services.AddScoped<IWalletService, WalletService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IDisputeService, DisputeService>();
+        services.AddScoped<IWebhookService, WebhookService>();
 
         return services;
     }

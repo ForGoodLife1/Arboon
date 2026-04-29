@@ -1,0 +1,12 @@
+using System.Text.Json.Serialization;
+
+namespace Arboon.Application.DTOs.Dispute;
+
+public class AddDisputeMessageDto
+{
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = string.Empty;
+
+    [JsonPropertyName("buyer_token")]
+    public Guid? BuyerToken { get; set; }
+}

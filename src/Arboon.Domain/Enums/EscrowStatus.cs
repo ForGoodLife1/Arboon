@@ -5,5 +5,7 @@ public enum EscrowStatus
     PENDING,
     FROZEN,
     RELEASED,
-    CANCELLED
+    CANCELLED,
+    DISPUTED,
+    REFUNDED
 }

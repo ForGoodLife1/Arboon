@@ -26,6 +26,7 @@ public class Escrow
     // Navigation properties
     public virtual User Seller { get; set; } = null!;
     public virtual BuyerToken? BuyerToken { get; set; }
+    public virtual ICollection<Dispute> Disputes { get; set; } = new List<Dispute>();
 
     /// <summary>
     /// Generates a unique escrow ID in the format "esc_XXXXXXXXX" (9 random digits).
@@ -67,11 +68,11 @@ public class Escrow
     }
 
     /// <summary>
-    /// Transitions escrow from FROZEN to RELEASED when buyer confirms delivery.
+    /// Transitions escrow from FROZEN/DISPUTED to RELEASED when buyer confirms delivery or admin resolves.
     /// </summary>
     public void Release()
     {
-        if (Status != EscrowStatus.FROZEN)
+        if (Status != EscrowStatus.FROZEN && Status != EscrowStatus.DISPUTED)
             throw new InvalidStatusTransitionException(Status, EscrowStatus.RELEASED);
 
         Status = EscrowStatus.RELEASED;
@@ -87,5 +88,27 @@ public class Escrow
             throw new InvalidStatusTransitionException(Status, EscrowStatus.CANCELLED);
 
         Status = EscrowStatus.CANCELLED;
+    }
+
+    /// <summary>
+    /// Transitions escrow from FROZEN to DISPUTED when a party opens a dispute.
+    /// </summary>
+    public void Dispute()
+    {
+        if (Status != EscrowStatus.FROZEN)
+            throw new InvalidStatusTransitionException(Status, EscrowStatus.DISPUTED);
+
+        Status = EscrowStatus.DISPUTED;
+    }
+
+    /// <summary>
+    /// Transitions escrow from DISPUTED to REFUNDED when admin resolves the dispute in favor of buyer.
+    /// </summary>
+    public void Refund()
+    {
+        if (Status != EscrowStatus.DISPUTED)
+            throw new InvalidStatusTransitionException(Status, EscrowStatus.REFUNDED);
+
+        Status = EscrowStatus.REFUNDED;
     }
 }

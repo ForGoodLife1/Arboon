@@ -13,5 +13,9 @@ public interface IAppDbContext
     DbSet<Escrow> Escrows { get; }
     DbSet<BuyerToken> BuyerTokens { get; }
     DbSet<Wallet> Wallets { get; }
+    DbSet<WebhookEndpoint> WebhookEndpoints { get; }
+    DbSet<WebhookDelivery> WebhookDeliveries { get; }
+    DbSet<Dispute> Disputes { get; }
+    DbSet<DisputeMessage> DisputeMessages { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

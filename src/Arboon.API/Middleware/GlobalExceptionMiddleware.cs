@@ -58,6 +58,15 @@ public class GlobalExceptionMiddleware
             DuplicateEmailException ex =>
                 (HttpStatusCode.Conflict, ex.ErrorCode, ex.Message),
 
+            DisputeNotFoundException ex =>
+                (HttpStatusCode.NotFound, ex.ErrorCode, ex.Message),
+
+            ActiveDisputeExistsException ex =>
+                (HttpStatusCode.Conflict, ex.ErrorCode, ex.Message),
+
+            WebhookEndpointNotFoundException ex =>
+                (HttpStatusCode.NotFound, ex.ErrorCode, ex.Message),
+
             DomainException ex =>
                 (HttpStatusCode.BadRequest, ex.ErrorCode, ex.Message),
 

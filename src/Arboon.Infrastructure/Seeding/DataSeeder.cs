@@ -22,6 +22,18 @@ public static class DataSeeder
 
         logger.LogInformation("🌱 Seeding MVP mock data...");
 
+        // 1. Seed Admin
+        var adminUser = new User
+        {
+            Id = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+            Name = "مدير النظام",
+            Email = "admin@arboon.app",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            Role = "Admin",
+            CreatedAt = DateTime.UtcNow.AddDays(-30)
+        };
+        context.Users.Add(adminUser);
+
         var testSeller1 = new User
         {
             Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -37,6 +49,7 @@ public static class DataSeeder
             Name = "بائع تجريبي ٢",
             Email = "seller2@test.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Test@1234"),
+            Role = "Seller",
             CreatedAt = DateTime.UtcNow.AddDays(-5)
         };
 
@@ -121,7 +134,65 @@ public static class DataSeeder
         cancelledEscrow.CalculateAndSetFee();
         cancelledEscrow.PaymentUrl = $"https://arboon.app/pay/{cancelledEscrow.Id}";
 
-        context.Escrows.AddRange(pendingEscrow, frozenEscrow, releasedEscrow, cancelledEscrow);
+        var disputedEscrow = new Escrow
+        {
+            Id = Escrow.GenerateId(),
+            SellerId = testSeller2.Id,
+            Title = "تطوير تطبيق جوال",
+            Amount = 2500,
+            Currency = "SAR",
+            Conditions = "تطبيق أندرويد و iOS",
+            Status = EscrowStatus.DISPUTED,
+            BuyerEmail = "disputed_buyer@test.com",
+            CreatedAt = DateTime.UtcNow.AddDays(-7)
+        };
+        disputedEscrow.CalculateAndSetFee();
+        disputedEscrow.PaymentUrl = $"https://arboon.app/pay/{disputedEscrow.Id}";
+
+        context.Escrows.AddRange(pendingEscrow, frozenEscrow, releasedEscrow, cancelledEscrow, disputedEscrow);
+        await context.SaveChangesAsync();
+
+        // Seed a dispute
+        var dispute = new Dispute
+        {
+            Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+            EscrowId = disputedEscrow.Id,
+            OpenedBy = DisputeParty.Buyer,
+            Reason = "التطبيق به العديد من الأخطاء البرمجية ولم يتم الالتزام بالتصميم",
+            Status = DisputeStatus.OPEN,
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        context.Disputes.Add(dispute);
+        
+        // Seed dispute messages
+        var message1 = new DisputeMessage
+        {
+            DisputeId = dispute.Id,
+            SenderType = DisputeParty.Buyer,
+            Message = "الرجاء مراجعة المرفقات، التطبيق لا يعمل على نظام iOS",
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        var message2 = new DisputeMessage
+        {
+            DisputeId = dispute.Id,
+            SenderType = DisputeParty.Seller,
+            Message = "لقد قمت باختبار التطبيق وهو يعمل، المشكلة من جهازك",
+            CreatedAt = DateTime.UtcNow.AddHours(-12)
+        };
+        context.DisputeMessages.AddRange(message1, message2);
+        await context.SaveChangesAsync();
+
+        // Seed webhook endpoint for seller 1
+        var webhookEndpoint = new WebhookEndpoint
+        {
+            Id = Guid.NewGuid(),
+            SellerId = testSeller1.Id,
+            Url = "https://webhook.site/placeholder-url", // Developer can change this later
+            Secret = "whsec_test_secret",
+            Events = "escrow.created,escrow.funded,escrow.released,dispute.opened",
+            IsActive = true
+        };
+        context.WebhookEndpoints.Add(webhookEndpoint);
         await context.SaveChangesAsync();
 
         // Seed a buyer token for the frozen escrow so it can be tested for release
@@ -136,6 +207,7 @@ public static class DataSeeder
         await context.SaveChangesAsync();
 
         logger.LogInformation("✅ MVP mock data seeded successfully.");
+        logger.LogInformation("Admin User: admin@arboon.app / Admin@123");
         logger.LogInformation("Seller 1: {Email} / Test@1234", testSeller1.Email);
         logger.LogInformation("Seller 2: {Email} / Test@1234", testSeller2.Email);
         logger.LogInformation("Frozen Escrow ID to test release: {EscrowId}", frozenEscrow.Id);

@@ -14,6 +14,10 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Escrow> Escrows => Set<Escrow>();
     public DbSet<BuyerToken> BuyerTokens => Set<BuyerToken>();
     public DbSet<Wallet> Wallets => Set<Wallet>();
+    public DbSet<WebhookEndpoint> WebhookEndpoints => Set<WebhookEndpoint>();
+    public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
+    public DbSet<Dispute> Disputes => Set<Dispute>();
+    public DbSet<DisputeMessage> DisputeMessages => Set<DisputeMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

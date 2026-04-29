@@ -57,6 +57,12 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IPaymentService, PaymentService>();
 
+        // Background services
+        services.AddHostedService<WebhookRetryBackgroundService>();
+
+        // Http Client Factory for Webhooks
+        services.AddHttpClient();
+
         return services;
     }
 }
