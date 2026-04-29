@@ -45,6 +45,16 @@ try
         });
 
     // ──────────────────────────────────────────
+    // HTTP Logging (to log request/response data)
+    // ──────────────────────────────────────────
+    builder.Services.AddHttpLogging(logging =>
+    {
+        logging.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+        logging.RequestBodyLogLimit = 4096;
+        logging.ResponseBodyLogLimit = 4096;
+    });
+
+    // ──────────────────────────────────────────
     // Swagger / OpenAPI
     // ──────────────────────────────────────────
     builder.Services.AddEndpointsApiExplorer();
@@ -118,6 +128,12 @@ try
 
     // Global exception handling (first in pipeline)
     app.UseMiddleware<GlobalExceptionMiddleware>();
+
+    // Http Logging (to log request/response data locally)
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHttpLogging();
+    }
 
     // Serilog request logging
     app.UseSerilogRequestLogging();
