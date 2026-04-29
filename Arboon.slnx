@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Arboon.API/Arboon.API.csproj" />
+    <Project Path="src/Arboon.Application/Arboon.Application.csproj" />
+    <Project Path="src/Arboon.Domain/Arboon.Domain.csproj" />
+    <Project Path="src/Arboon.Infrastructure/Arboon.Infrastructure.csproj" />
+  </Folder>
+</Solution>

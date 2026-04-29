@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Arboon API
+  version: 2.0.0
+  description: Micro-Escrow Infrastructure API
+
+servers:
+  - url: https://api.arboon.app/api/v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+schemas:
+  Escrow:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      amount:
+        type: number
+      currency:
+        type: string
+      status:
+        type: string
+
+paths:
+
+  /escrows:
+    post:
+      summary: Create escrow
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, amount, currency]
+              properties:
+                title:
+                  type: string
+                amount:
+                  type: number
+                currency:
+                  type: string
+                conditions:
+                  type: string
+      responses:
+        "200":
+          description: Escrow created
+
+    get:
+      summary: Get seller escrows
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of escrows
+
+  /escrows/{id}:
+    get:
+      summary: Get escrow details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Escrow details
+
+  /escrows/{id}/buyer-status:
+    get:
+      summary: Check buyer identity
+      parameters:
+        - name: token
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Buyer status
+
+  /escrows/{id}/pay:
+    post:
+      summary: Pay escrow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payment_method, card_token, buyer_email]
+              properties:
+                payment_method:
+                  type: string
+                card_token:
+                  type: string
+                buyer_email:
+                  type: string
+      responses:
+        "200":
+          description: Payment successful
+
+  /escrows/{id}/release:
+    post:
+      summary: Release funds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyer_token:
+                  type: string
+      responses:
+        "200":
+          description: Funds released
+
+  /wallet/balance:
+    get:
+      summary: Get wallet balance
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Wallet balance
