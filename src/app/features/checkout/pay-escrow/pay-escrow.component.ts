@@ -139,7 +139,7 @@ export class PayEscrowComponent implements OnInit {
       this.isProcessing.set(true);
 
       // استخراج التوكن من الرابط إن وجد
-      const token = this.route.snapshot.queryParamMap.get('token') || 'mock_token_123';
+      const token = this.route.snapshot.queryParamMap.get('token') || '';
 
       this.disputeService.openBuyerDispute({
         escrow_id: currentEscrow.id,
