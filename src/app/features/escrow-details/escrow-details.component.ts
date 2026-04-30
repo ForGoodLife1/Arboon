@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { EscrowService } from '../../core/services/escrow.service';
-import { Escrow } from '../../core/models/escrow.interface';
+import { Escrow, EscrowStatus } from '../../core/models/escrow.interface';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../../core/services/alert.service';
 import { DisputeService } from '../../core/services/dispute.service';
@@ -59,9 +59,10 @@ export class EscrowDetailsComponent implements OnInit {
     const currentEscrow = this.escrow();
     if (!currentEscrow) return;
 
-    // 1. التحقق من الحالة (يجب أن تكون مجمدة)
-    if (currentEscrow.status !== 'FROZEN') {
-      this.alertService.error('عذراً، لا يمكن فتح نزاع إلا على العُهد المجمدة (FROZEN) فقط.');
+    // 1. التحقق من الحالة (يجب أن تكون مجمدة أو بانتظار الدفع)
+    const validStatuses: EscrowStatus[] = ['FROZEN', 'PENDING'];
+    if (!validStatuses.includes(currentEscrow.status)) {
+      this.alertService.error('عذراً، لا يمكن فتح نزاع على هذه العُهدة في حالتها الحالية.');
       return;
     }
 

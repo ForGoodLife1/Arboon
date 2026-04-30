@@ -15,7 +15,6 @@ export class DisputeCenterComponent implements OnInit {
   private disputeService = inject(DisputeService);
   private alertService = inject(AlertService);
 
-  // Signals لإدارة الحالة
   disputes = signal<Dispute[]>([]);
   selectedDispute = signal<Dispute | null>(null);
   messages = signal<DisputeMessage[]>([]);

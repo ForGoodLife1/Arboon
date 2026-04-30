@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  // 1. مسارات المشتري (مستقلة تماماً وبدون السايد بار)
   {
     path: 'pay/:id',
     loadComponent: () => import('./features/checkout/pay-escrow/pay-escrow.component').then(c => c.PayEscrowComponent)
@@ -11,7 +10,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dispute-center/buyer-dispute.component').then(c => c.BuyerDisputeComponent)
   },
 
-  // 2. المسارات المحمية اللي جواها السايد بار (للمستقل)
   {
     path: '',
     loadComponent: () => import('./shared/layouts/main-layout/main-layout.component').then(c => c.MainLayoutComponent),
@@ -37,12 +35,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/escrow-details/escrow-details.component').then(c => c.EscrowDetailsComponent)
       },
 
-      // التوجيه الافتراضي لو دخل على الموقع مباشرة
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
-  // 3. مسار الخطأ (404)
   { path: '**', redirectTo: 'dashboard' }
 ];
 
