@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Arboon.Application.Common;
 using Arboon.Application.DTOs.Escrow;
+using Arboon.Application.DTOs.Wallet;
 using Arboon.Application.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -13,15 +14,18 @@ namespace Arboon.API.Controllers;
 public class EscrowsController : ControllerBase
 {
     private readonly IEscrowService _escrowService;
+    private readonly IWalletService _walletService;
     private readonly IValidator<CreateEscrowDto> _createValidator;
     private readonly IValidator<PayEscrowDto> _payValidator;
 
     public EscrowsController(
         IEscrowService escrowService,
+        IWalletService walletService,
         IValidator<CreateEscrowDto> createValidator,
         IValidator<PayEscrowDto> payValidator)
     {
         _escrowService = escrowService;
+        _walletService = walletService;
         _createValidator = createValidator;
         _payValidator = payValidator;
     }
@@ -188,5 +192,48 @@ public class EscrowsController : ControllerBase
     {
         await _escrowService.CancelAsync(id, GetUserId());
         return Ok(ApiResponse.SuccessResponse("تم إلغاء العُهدة بنجاح"));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Dashboard  →  GET /api/v1/escrows/dashboard
+    // ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns dashboard stats + recent escrows for the authenticated seller.
+    /// </summary>
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(ApiResponse<DashboardDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDashboard()
+    {
+        var result = await _escrowService.GetDashboardDataAsync(GetUserId());
+        return Ok(ApiResponse<DashboardDto>.SuccessResponse(result));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Wallet     →  GET  /api/v1/escrows/wallet
+    //               POST /api/v1/escrows/wallet/withdraw
+    // ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns wallet stats (available / pending / withdrawn) + transaction history.
+    /// </summary>
+    [HttpGet("wallet")]
+    [ProducesResponseType(typeof(ApiResponse<WalletDataDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetWallet()
+    {
+        var result = await _walletService.GetWalletDataAsync(GetUserId());
+        return Ok(ApiResponse<WalletDataDto>.SuccessResponse(result));
+    }
+
+    /// <summary>
+    /// Submit a withdrawal request for the authenticated seller.
+    /// </summary>
+    [HttpPost("wallet/withdraw")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RequestWithdrawal([FromBody] WithdrawalRequestDto dto)
+    {
+        await _walletService.RequestWithdrawalAsync(GetUserId(), dto);
+        return Ok(ApiResponse.SuccessResponse("تم استلام طلب السحب بنجاح"));
     }
 }

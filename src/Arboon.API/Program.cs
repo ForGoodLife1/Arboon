@@ -109,6 +109,7 @@ try
             var frontendUrl = builder.Configuration["AppSettings:FrontendUrl"] ?? "http://localhost:3000";
             policy
                 .WithOrigins(frontendUrl, "https://arboon.app")
+                .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();

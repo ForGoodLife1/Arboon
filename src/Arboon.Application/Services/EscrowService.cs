@@ -252,4 +252,31 @@ public class EscrowService : IEscrowService
 
         await _webhookService.DispatchAsync(eventName, escrow.Id, payload);
     }
+
+    public async Task<DashboardDto> GetDashboardDataAsync(Guid sellerId)
+    {
+        var escrows = await _context.Escrows
+            .Include(e => e.Seller)
+            .Where(e => e.SellerId == sellerId)
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync();
+
+        var frozenTotal    = escrows.Where(e => e.Status == Domain.Enums.EscrowStatus.FROZEN)
+                                    .Sum(e => e.Amount);
+        var completedCount = escrows.Count(e => e.Status == Domain.Enums.EscrowStatus.RELEASED);
+        var pendingCount   = escrows.Count(e => e.Status == Domain.Enums.EscrowStatus.PENDING);
+
+        var recentEscrows = _mapper.Map<List<EscrowResponseDto>>(escrows.Take(10).ToList());
+
+        return new DashboardDto
+        {
+            Stats = new DashboardStatsDto
+            {
+                FrozenTotal    = frozenTotal,
+                CompletedCount = completedCount,
+                PendingCount   = pendingCount
+            },
+            RecentEscrows = recentEscrows
+        };
+    }
 }

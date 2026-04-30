@@ -11,4 +11,5 @@ public interface IEscrowService
     Task<object> ReleaseAsync(string escrowId, Guid? tokenFromBody, Guid? tokenFromCookie);
     Task<BuyerStatusResponseDto> GetBuyerStatusAsync(string escrowId, Guid? token);
     Task CancelAsync(string escrowId, Guid sellerId);
+    Task<DashboardDto> GetDashboardDataAsync(Guid sellerId);
 }
