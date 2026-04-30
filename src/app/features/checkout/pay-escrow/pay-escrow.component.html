@@ -1,0 +1,243 @@
+@if (isLoading()) {
+  <div class="min-h-screen flex items-center justify-center bg-[#070A0B]">
+    <span class="w-12 h-12 border-4 border-[#10B981]/20 border-t-[#10B981] rounded-full animate-spin"></span>
+  </div>
+} 
+
+@else if (escrow()?.status === 'PENDING') {
+  <main class="min-h-screen pt-24 pb-12 px-4 md:px-8 flex items-center justify-center bg-[#070A0B] text-right" dir="rtl">
+    
+    <div class="max-w-360 w-full flex flex-col lg:flex-row gap-8 items-start rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl">
+      
+      <section class="w-full lg:w-[55%] space-y-8 bg-[#070A0B] p-8 md:p-12">
+        <div>
+          <h2 class="text-3xl font-bold text-white mb-2">إكمال الدفع</h2>
+          <p class="text-zinc-500 text-sm">اختر وسيلة الدفع المفضلة لديك لبدء عملية العهدة.</p>
+        </div>
+
+        <div class="flex flex-wrap p-1.5 bg-[#12181A] rounded-2xl gap-2 border border-white/5">
+          <button type="button" (click)="selectMethod('card')"
+                  [class]="selectedMethod === 'card' ? 'bg-[#10B981] text-[#070A0B]' : 'text-zinc-400 hover:bg-white/5'"
+                  class="flex-1 min-w-25 py-3 px-2 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-sm">
+            <span class="material-symbols-outlined text-lg">credit_card</span>بطاقة
+          </button>
+          <button type="button" (click)="selectMethod('instapay')"
+                  [class]="selectedMethod === 'instapay' ? 'bg-[#10B981] text-[#070A0B]' : 'text-zinc-400 hover:bg-white/5'"
+                  class="flex-1 min-w-25 py-3 px-2 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-sm">
+            <span class="material-symbols-outlined text-lg">account_balance_wallet</span>Instapay
+          </button>
+          <button type="button" (click)="selectMethod('wallet')"
+                  [class]="selectedMethod === 'wallet' ? 'bg-[#10B981] text-[#070A0B]' : 'text-zinc-400 hover:bg-white/5'"
+                  class="flex-1 min-w-25 py-3 px-2 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-sm">
+            <span class="material-symbols-outlined text-lg">phone_iphone</span>محافظ
+          </button>
+          <button type="button" (click)="selectMethod('paypal')"
+                  [class]="selectedMethod === 'paypal' ? 'bg-[#10B981] text-[#070A0B]' : 'text-zinc-400 hover:bg-white/5'"
+                  class="flex-1 min-w-25 py-3 px-2 rounded-xl flex items-center justify-center gap-2 font-bold transition-all text-sm">
+            <span class="material-symbols-outlined text-lg">language</span>PayPal
+          </button>
+        </div>
+
+        <form class="space-y-6">
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-zinc-500 mr-2">البريد الإلكتروني (إجباري)</label>
+            <input type="email" [(ngModel)]="buyerEmail" name="buyerEmail"
+                   class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white focus:outline-none focus:border-[#10B981]/30 transition-all text-left"
+                   placeholder="your@email.com">
+          </div>
+
+          <div class="animate-fade-in min-h-55">
+            @if (selectedMethod === 'card') {
+              <div class="space-y-4">
+                <input type="text" [(ngModel)]="cardName" name="cardName" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-left focus:border-[#10B981]/30" placeholder="الاسم على البطاقة">
+                <input type="text" [(ngModel)]="cardNumber" name="cardNumber" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white focus:border-[#10B981]/30" placeholder="0000 0000 0000 0000">
+                <div class="flex gap-4">
+                  <input type="text" [(ngModel)]="expiryDate" name="expiryDate" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-center focus:border-[#10B981]/30" placeholder="MM/YY">
+                  <input type="text" [(ngModel)]="cvv" name="cvv" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-center focus:border-[#10B981]/30" placeholder="CVV">
+                </div>
+              </div>
+            } @else if (selectedMethod === 'instapay') {
+              <div class="space-y-4">
+                <input type="text" [(ngModel)]="ipaAddress" name="ipaAddress" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-left focus:border-[#10B981]/30" placeholder="username@instapay">
+                <p class="text-xs text-zinc-500">سيصلك طلب دفع على تطبيق انستا باي الخاص بك.</p>
+              </div>
+            } @else if (selectedMethod === 'wallet') {
+              <div class="space-y-4">
+                <input type="text" [(ngModel)]="walletNumber" name="walletNumber" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-left focus:border-[#10B981]/30" placeholder="رقم الموبايل (مثال: 01000000000)">
+                <p class="text-xs text-zinc-500">سيتم إرسال رسالة تأكيد لمحفظتك (فودافون كاش، اتصالات كاش، إلخ).</p>
+              </div>
+            } @else if (selectedMethod === 'paypal') {
+              <div class="space-y-4">
+                <input type="email" [(ngModel)]="paypalEmail" name="paypalEmail" dir="ltr" class="w-full bg-[#12181A] border border-white/5 rounded-2xl p-4 text-white text-left focus:border-[#10B981]/30" placeholder="paypal_account@email.com">
+                <p class="text-xs text-zinc-500">سيتم توجيهك إلى منصة PayPal بأمان لإتمام العملية.</p>
+              </div>
+            }
+          </div>
+
+          <div class="p-6 rounded-3xl bg-[#12181A] border border-white/5">
+             <div class="flex justify-between items-center">
+                <span class="text-white font-bold text-lg">المجموع النهائي</span>
+                <span class="text-[#10B981] text-3xl font-black">{{ (escrow()?.amount || 0) + 25 }} <span class="text-sm">ريال</span></span>
+             </div>
+          </div>
+
+          <button type="button" (click)="simulatePayment()" [disabled]="isProcessing()"
+                  class="w-full bg-[#10B981] text-[#070A0B] py-5 rounded-2xl text-xl font-black hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+            @if (!isProcessing()) {
+               <span>تأكيد الدفع</span>
+            } @else {
+              <span class="w-6 h-6 border-4 border-[#070A0B]/20 border-t-[#070A0B] rounded-full animate-spin"></span>
+            }
+          </button>
+        </form>
+      </section>
+
+      <section class="w-full lg:w-[45%] bg-[#12181A] p-8 md:p-12 flex flex-col justify-center h-full min-h-200">
+        <div class="space-y-10">
+          <!-- Freelancer Card -->
+          <div class="flex items-center gap-5 p-6 bg-[#070A0B]/50 border border-white/5 rounded-3xl">
+            <img [src]="escrow()?.seller_avatar" class="w-16 h-16 rounded-2xl object-cover border-2 border-[#10B981]/20 shadow-lg" alt="Freelancer">
+            <div>
+              <p class="text-zinc-500 text-xs mb-1">صاحب الخدمة (المستقل)</p>
+              <h3 class="text-white font-bold text-lg leading-none mb-2">{{ escrow()?.seller_name }}</h3>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-zinc-300 text-xs font-bold">{{ escrow()?.seller_rating }}</span>
+                <span class="text-zinc-600 text-xs mx-1">|</span>
+                <span class="text-emerald-500 text-[10px] font-bold uppercase tracking-wider">هوية موثقة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Details -->
+          <div class="space-y-6">
+            <div class="w-14 h-14 bg-[#10B981]/10 rounded-2xl flex items-center justify-center border border-[#10B981]/20">
+              <span class="material-symbols-outlined text-[#10B981] text-3xl" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+            </div>
+            <div class="space-y-3">
+              <h1 class="text-2xl font-bold text-white">{{ escrow()?.title }}</h1>
+              <p class="text-zinc-400 text-sm leading-relaxed">{{ escrow()?.description }}</p>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="glass-panel rounded-4xl p-8 space-y-6 bg-white/[0.02] border border-white/5">
+            <h3 class="text-md font-bold text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-500">verified</span>شروط عقد الضمان
+            </h3>
+            <div class="space-y-4">
+              <div class="flex gap-4 items-start">
+                <span class="material-symbols-outlined text-[#10B981] text-lg mt-0.5">check_circle</span>
+                <div>
+                  <p class="text-white font-bold text-xs mb-1">حماية المشتري</p>
+                  <p class="text-zinc-500 text-[10px] leading-relaxed">يتم حجز المبلغ في عُربون ولا يصل للمستقل إلا بعد تأكيدك للاستلام.</p>
+                </div>
+              </div>
+              <div class="flex gap-4 items-start">
+                <span class="material-symbols-outlined text-[#10B981] text-lg mt-0.5">check_circle</span>
+                <div>
+                  <p class="text-white font-bold text-xs mb-1">شروط المستقل</p>
+                  <p class="text-zinc-500 text-[10px] leading-relaxed">{{ escrow()?.conditions }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+    </div>
+  </main>
+}
+
+@else if (escrow()?.status === 'FROZEN') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4 md:p-8" dir="rtl">
+    <div class="max-w-2xl w-full bg-[#12181A] rounded-[3rem] p-8 md:p-12 border border-white/5 shadow-2xl space-y-8 relative overflow-hidden">
+       
+       <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#10B981]/10 blur-3xl rounded-full pointer-events-none"></div>
+
+       <div class="text-center space-y-4 relative z-10">
+         <div class="w-20 h-20 mx-auto bg-[#10B981]/10 rounded-full flex items-center justify-center border border-[#10B981]/20 mb-6">
+           <span class="material-symbols-outlined text-[#10B981] text-4xl">lock_clock</span>
+         </div>
+         <h2 class="text-3xl font-bold text-white">الأموال مجمدة بنجاح</h2>
+         <p class="text-zinc-400 leading-relaxed">لقد قمت بإيداع مبلغ <span class="text-[#10B981] font-bold">{{ escrow()?.amount }} ريال</span>. الأموال الآن في حوزة منصة عُربون لحين استلامك للخدمة.</p>
+       </div>
+
+       <div class="p-6 bg-[#070A0B] border border-white/5 rounded-2xl relative z-10">
+         <h3 class="text-white font-bold mb-2">هل استلمت الخدمة؟</h3>
+         <p class="text-sm text-zinc-500 mb-6 leading-relaxed">بالضغط على "تحرير الأموال"، أنت تؤكد استلامك للخدمة المتفق عليها، وسيتم تحويل المبلغ فوراً إلى حساب المستقل. <span class="text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span></p>
+         
+         <button type="button" (click)="release()" [disabled]="isProcessing()"
+                 class="w-full bg-[#10B981] text-[#070A0B] py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-4">
+            @if (!isProcessing()) {
+              <span class="material-symbols-outlined">lock_open</span>
+              تأكيد واستلام (تحرير الأموال)
+            } @else {
+              <span class="w-6 h-6 border-4 border-[#070A0B]/20 border-t-[#070A0B] rounded-full animate-spin"></span>
+              جاري التحرير...
+            }
+         </button>
+
+         <button type="button" (click)="openDispute()" [disabled]="isProcessing()"
+                 class="w-full bg-transparent text-red-500 py-3 rounded-xl font-medium hover:bg-red-500/5 transition-all text-sm border border-red-500/10">
+           لديك مشكلة؟ فتح نزاع أو اعتراض
+         </button>
+       </div>
+
+    </div>
+  </main>
+}
+
+@else if (escrow()?.status === 'DISPUTED') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
+    <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none"></div>
+      <div class="w-24 h-24 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-6 relative z-10 border border-red-500/20">
+        <span class="material-symbols-outlined text-red-500 text-5xl">gavel</span>
+      </div>
+      <h2 class="text-3xl font-black text-white mb-4 relative z-10">المعاملة في حالة نزاع</h2>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">الأموال مجمدة الآن ولا يمكن تحريرها أو استردادها حتى يتم حل النزاع من قبل فريق الإدارة. يمكنك متابعة النقاش في صفحة النزاع.</p>
+      
+      <a [routerLink]="['/dispute', 'active']" [queryParams]="{token: ''}" class="inline-block w-full bg-red-500 text-white py-4 rounded-xl font-bold transition-all relative z-10 hover:brightness-110">
+        الذهاب لصفحة المحادثة
+      </a>
+    </div>
+  </main>
+}
+
+@else if (escrow()?.status === 'REFUNDED') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
+    <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+      <div class="w-24 h-24 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center mb-6 relative z-10 border border-blue-500/20">
+        <span class="material-symbols-outlined text-blue-500 text-5xl">undo</span>
+      </div>
+      <h2 class="text-3xl font-black text-white mb-4 relative z-10">تم استرداد المبلغ</h2>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">تمت إعادة مبلغ <span class="text-white font-bold">{{ escrow()?.amount }} {{ escrow()?.currency }}</span> بنجاح إلى وسيلة الدفع الخاصة بك.</p>
+      
+      <a routerLink="/" class="inline-block w-full bg-white/5 border border-white/10 text-white py-4 rounded-xl font-bold transition-all relative z-10">
+        العودة للرئيسية
+      </a>
+    </div>
+  </main>
+}
+
+@else if (escrow()?.status === 'RELEASED') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
+    <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+      
+      <div class="absolute inset-0 bg-gradient-to-b from-[#10B981]/5 to-transparent pointer-events-none"></div>
+      
+      <div class="w-24 h-24 mx-auto bg-[#10B981]/20 rounded-full flex items-center justify-center mb-6 relative z-10">
+        <span class="material-symbols-outlined text-[#10B981] text-5xl">check_circle</span>
+      </div>
+      
+      <h2 class="text-3xl font-black text-white mb-4 relative z-10">تم إنهاء المعاملة!</h2>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">تم تحرير مبلغ <span class="text-white font-bold">{{ escrow()?.amount }} {{ escrow()?.currency }}</span> بنجاح للمستقل. شكراً لاستخدامك منصة عُربون لحماية معاملاتك.</p>
+      
+      <a routerLink="/" class="inline-block w-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white py-4 rounded-xl font-bold transition-all relative z-10">
+        العودة للصفحة الرئيسية
+      </a>
+    </div>
+  </main>
+}

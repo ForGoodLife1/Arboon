@@ -1,0 +1,190 @@
+<div class="p-4 md:p-8 space-y-6 md:space-y-8 pt-20 lg:pt-8 text-right" dir="rtl">
+  
+  @if (isLoading()) {
+    <div class="flex justify-center items-center h-64">
+      <span class="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></span>
+    </div>
+  } @else {
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      
+      <div class="glass-card bg-[#121718] border border-white/5 p-6 rounded-4xl relative overflow-hidden group col-span-1 sm:col-span-2 shadow-xl">
+        <div class="absolute top-0 left-0 w-32 h-32 bg-emerald-500/10 blur-3xl -ml-10 -mt-10 group-hover:bg-emerald-500/20 transition-colors"></div>
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-emerald-500" style="font-variation-settings: 'FILL' 1;">lock_clock</span>
+          </div>
+          <span class="text-zinc-500 text-sm font-medium">+12% عن الشهر الماضي</span>
+        </div>
+        <h3 class="text-zinc-400 text-[14px] font-medium mb-1">إجمالي الأموال المجمدة</h3>
+        <div class="flex items-baseline gap-2 relative z-10">
+          <span class="text-3xl md:text-[36px] font-extrabold leading-[1.2] text-white">{{ frozenTotal().toLocaleString('ar-EG', {minimumFractionDigits: 2}) }}</span>
+          <span class="text-zinc-500 font-bold">ريال</span>
+        </div>
+        <div class="mt-4 flex gap-2 relative z-10">
+          <span class="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">مؤمنة بالكامل</span>
+        </div>
+      </div>
+
+      <div class="glass-card bg-[#121718] border border-white/5 p-6 rounded-4xl relative overflow-hidden group shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-500" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+          </div>
+        </div>
+        <h3 class="text-zinc-400 text-[14px] font-medium mb-1">مكتملة</h3>
+        <div class="flex items-baseline gap-2">
+          <span class="text-[24px] font-extrabold text-white">{{ completedCount() }}</span>
+          <span class="text-zinc-500 text-xs">اتفاقية ناجحة</span>
+        </div>
+      </div>
+
+      <div class="glass-card bg-[#121718] border border-white/5 p-6 rounded-4xl relative overflow-hidden group shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-yellow-500" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+          </div>
+        </div>
+        <h3 class="text-zinc-400 text-[14px] font-medium mb-1">بانتظار الموافقة</h3>
+        <div class="flex items-baseline gap-2">
+          <span class="text-[24px] font-extrabold text-white">{{ pendingCount() < 10 ? '0' + pendingCount() : pendingCount() }}</span>
+        </div>
+        <p class="text-zinc-500 text-[11px] mt-2">تحتاج لمراجعتك الآن</p>
+      </div>
+    </div>
+
+    <div class="glass-card bg-[#121718] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl mt-8">
+      <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 gap-4 md:gap-0">
+        <div>
+          <h2 class="text-xl md:text-[24px] font-semibold text-white mb-1">العُهد النشطة</h2>
+          <p class="text-zinc-500 text-xs md:text-sm">إدارة ومتابعة جميع معاملاتك المؤمنة الحالية</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <!-- Search Input -->
+          <div class="relative flex-1 md:w-64">
+            <input type="text" 
+                   [ngModel]="searchTerm()" 
+                   (ngModelChange)="searchTerm.set($event)"
+                   placeholder="بحث بالاسم أو الرقم..." 
+                   class="w-full bg-[#0B0F10] border border-white/10 px-10 py-2.5 rounded-xl text-sm text-white focus:border-emerald-500/50 focus:outline-none transition-all placeholder:text-zinc-700">
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 text-xl">search</span>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="relative">
+            <select [ngModel]="statusFilter()" 
+                    (ngModelChange)="statusFilter.set($event)"
+                    class="w-full sm:w-auto bg-[#0B0F10] border border-white/10 px-4 py-2.5 rounded-xl text-sm text-zinc-400 focus:border-emerald-500/50 focus:outline-none transition-all appearance-none pr-10 cursor-pointer">
+              <option value="ALL">الكل</option>
+              <option value="PENDING">بانتظار الدفع</option>
+              <option value="FROZEN">أموال مؤمنة</option>
+              <option value="RELEASED">مكتملة</option>
+              <option value="DISPUTED">نزاعات</option>
+              <option value="REFUNDED">مستردة</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none">filter_list</span>
+          </div>
+        </div>
+
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-right">
+          <thead>
+            <tr class="text-zinc-500 text-sm bg-white/2">
+              <th class="px-8 py-5 font-medium">اسم المعاملة</th>
+              <th class="px-8 py-5 font-medium text-center">الرقم المرجعي</th>
+              <th class="px-8 py-5 font-medium">المبلغ</th>
+              <th class="px-8 py-5 font-medium text-center">الحالة</th>
+              <th class="px-8 py-5 font-medium text-left">الإجراء</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            
+            @for (escrow of filteredEscrows(); track escrow.id) {
+              <tr class="hover:bg-white/3 transition-colors group cursor-pointer" [routerLink]="['/escrow-details', escrow.id]">
+                <td class="px-8 py-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#0B0F10] border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 transition-colors">
+                      <span class="material-symbols-outlined">{{ getIcon(escrow) }}</span>
+                    </div>
+                    <div>
+                      <div class="text-white text-sm font-semibold">{{ escrow.title }}</div>
+                      <div class="text-zinc-600 text-[11px] mt-1">{{ escrow.created_at }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-8 py-6 text-center">
+                  <code class="text-zinc-400 text-xs font-mono bg-white/5 px-3 py-1 rounded">ARB-{{ escrow.id }}</code>
+                </td>
+                <td class="px-8 py-6">
+                  <div class="text-white font-bold text-sm">{{ escrow.amount.toLocaleString() }} <span class="text-zinc-600 text-[10px]">{{ escrow.currency }}</span></div>
+                </td>
+                <td class="px-8 py-6 text-center">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
+                        [ngClass]="{
+                          'bg-emerald-500/10 text-emerald-500 border-emerald-500/20': escrow.status === 'FROZEN',
+                          'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': escrow.status === 'PENDING',
+                          'bg-blue-500/10 text-blue-500 border-blue-500/20': escrow.status === 'RELEASED',
+                          'bg-red-500/10 text-red-500 border-red-500/20': escrow.status === 'DISPUTED',
+                          'bg-zinc-500/10 text-zinc-500 border-zinc-500/20': escrow.status === 'REFUNDED'
+                        }">
+                    @if (escrow.status === 'PENDING' || escrow.status === 'FROZEN' || escrow.status === 'DISPUTED') {
+                      <span class="w-1.5 h-1.5 rounded-full animate-pulse" 
+                            [ngClass]="{
+                              'bg-emerald-500': escrow.status === 'FROZEN',
+                              'bg-yellow-500': escrow.status === 'PENDING',
+                              'bg-red-500': escrow.status === 'DISPUTED'
+                            }"></span>
+                    }
+                    {{ getStatusLabel(escrow.status) }}
+                  </span>
+                </td>
+                <td class="px-8 py-6 text-left">
+                  <button class="text-zinc-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-8 py-20 text-center text-zinc-600">
+                  <div class="flex flex-col items-center justify-center gap-3">
+                    <span class="material-symbols-outlined text-5xl opacity-20">search_off</span>
+                    <p>لا توجد نتائج تطابق بحثك حالياً.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+      <div class="p-6 bg-white/1 border-t border-white/5 flex justify-between items-center">
+        <span class="text-zinc-600 text-[10px]">عرض {{ filteredEscrows().length }} من إجمالي {{ activeEscrows().length }}</span>
+
+        <div class="flex items-center gap-2 text-[10px] text-zinc-500 font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          مزامنة البيانات الحية نشطة
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@if (showToast()) {
+  <div class="fixed bottom-6 right-6 z-60 animate-fade-in">
+    <div class="bg-[#121718] p-4 rounded-2xl flex items-center gap-4 border-r-4 border-emerald-500 shadow-2xl backdrop-blur-2xl">
+      <div class="w-10 h-10 bg-emerald-500/10 rounded-full flex shrink-0 items-center justify-center border border-emerald-500/20">
+        <span class="material-symbols-outlined text-emerald-500" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+      </div>
+      <div class="ml-4">
+        <p class="text-white font-bold text-sm">درع الحماية نشط</p>
+        <p class="text-zinc-500 text-[10px]">جميع معاملاتك محمية بنظام التوقيع المتعدد.</p>
+      </div>
+      <button class="p-1 hover:bg-white/10 rounded-full transition-colors mr-2 text-zinc-600" (click)="closeToast()">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+  </div>
+}

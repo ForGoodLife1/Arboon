@@ -1,0 +1,114 @@
+<nav class="sticky top-0 z-40 w-full transition-all duration-300 border-b"
+     dir="rtl"
+     [ngClass]="{
+       'bg-white/80 border-zinc-200/50 shadow-sm backdrop-blur-2xl': !isDarkMode(),
+       'bg-[#0B0F10]/80 border-white/5 shadow-2xl shadow-black/50 backdrop-blur-2xl': isDarkMode()
+     }">
+  <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      
+      <div class="flex items-center gap-3">
+        <a routerLink="/" class="flex items-center gap-3 group">
+          <div class="relative w-10 h-10 flex items-center justify-center rounded-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform overflow-hidden">
+             <img src="assets/looogo.png" alt="Arboun Logo" class="w-full h-full object-cover">
+          </div>
+          <span class="font-[800] text-2xl tracking-tight hidden sm:block transition-colors text-white">
+            <span class="text-emerald-500">عَرْ</span>بُون 
+          </span>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-3 sm:gap-5">
+        
+        <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border transition-colors cursor-default"
+             [ngClass]="isDarkMode() ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'">
+          <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+          <span class="font-bold text-sm tracking-tight" dir="ltr">{{ availableBalance() | number:'1.2-2' }} SAR</span>
+        </div>
+
+        <div class="relative">
+          <button (click)="toggleNotifications()" 
+                  class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all focus:outline-none"
+                  [ngClass]="isDarkMode() ? 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-900 border border-zinc-200'">
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            
+            @if (hasUnreadNotifications()) {
+              <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-950"></span>
+            }
+          </button>
+
+          @if (isNotificationsOpen()) {
+            <div class="absolute top-full left-0 mt-2 w-80 rounded-2xl shadow-2xl overflow-hidden z-50 animate-fade-in origin-top-left border"
+                 [ngClass]="isDarkMode() ? 'bg-[#121718] border-white/10 shadow-black/50' : 'bg-white border-zinc-200 shadow-zinc-200'">
+              
+              <div class="p-4 border-b flex justify-between items-center"
+                   [ngClass]="isDarkMode() ? 'border-white/5 bg-white/[0.02]' : 'border-zinc-100 bg-zinc-50'">
+                <span class="font-bold text-sm" [ngClass]="isDarkMode() ? 'text-white' : 'text-zinc-900'">الإشعارات</span>
+                <button class="text-emerald-500 text-xs hover:underline focus:outline-none">تحديد كـ مقروء</button>
+              </div>
+
+              <div class="max-h-64 overflow-y-auto">
+                @for (note of notifications(); track note.id) {
+                  <div class="p-4 border-b transition-colors cursor-pointer flex gap-3"
+                       [ngClass]="isDarkMode() ? 'border-white/5 hover:bg-white/[0.02]' : 'border-zinc-100 hover:bg-zinc-50'">
+                    
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-emerald-500 text-xs">notifications_active</span>
+                    </div>
+                    
+                    <div>
+                      <p class="text-sm leading-snug" 
+                         [ngClass]="isDarkMode() ? 'text-zinc-300' : 'text-zinc-700'"
+                         [class.font-bold]="!note.read">{{ note.text }}</p>
+                      <span class="text-[10px] mt-1 block"
+                            [ngClass]="isDarkMode() ? 'text-zinc-500' : 'text-zinc-400'">{{ note.time }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="p-3 text-center border-t"
+                   [ngClass]="isDarkMode() ? 'border-white/5 bg-white/[0.02]' : 'border-zinc-100 bg-zinc-50'">
+                <a href="#" class="text-xs hover:underline"
+                   [ngClass]="isDarkMode() ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-zinc-900'">
+                  عرض كل الإشعارات
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="relative group cursor-pointer">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 p-[2px] shadow-lg shadow-emerald-500/20 hover:scale-105 transition-transform">
+            <div class="w-full h-full rounded-full flex items-center justify-center text-sm font-bold border-2"
+                 [ngClass]="isDarkMode() ? 'bg-zinc-950 border-zinc-950 text-white' : 'bg-white border-white text-emerald-700'">
+              AS
+            </div>
+          </div>
+          
+          <div class="absolute top-full left-0 mt-2 w-48 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl border"
+               [ngClass]="isDarkMode() ? 'bg-[#121718] border-white/10 shadow-black/50' : 'bg-white border-zinc-200 shadow-zinc-200'">
+            <a routerLink="/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors"
+               [ngClass]="isDarkMode() ? 'text-zinc-300 hover:text-white hover:bg-white/5' : 'text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100'">
+              <span class="material-symbols-outlined text-[18px]">settings</span>
+              الإعدادات
+            </a>
+            <div class="h-px w-full my-1" [ngClass]="isDarkMode() ? 'bg-white/10' : 'bg-zinc-100'"></div>
+            <button (click)="logoutForDemo()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors text-red-500 hover:bg-red-500/10 text-right">
+              <span class="material-symbols-outlined text-[18px]">logout</span>
+              تسجيل الخروج
+            </button>
+          </div>
+        </div>
+        
+        <button (click)="layoutService.toggleMenu()" 
+                class="lg:hidden w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                [ngClass]="isDarkMode() ? 'bg-white/5 hover:bg-white/10 text-white border border-white/10' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200'">
+          <span class="material-symbols-outlined text-[20px]">menu</span>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</nav>

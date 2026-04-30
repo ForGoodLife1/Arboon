@@ -1,0 +1,160 @@
+<main class="p-4 md:p-8 space-y-8 text-right relative" dir="rtl">
+  
+  <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-black text-white">المحفظة المالية</h1>
+      <p class="text-zinc-500 text-sm mt-1">إدارة أرباحك وطلبات السحب الخاصة بك</p>
+    </div>
+    <button type="button" (click)="openWithdrawModal()" 
+            class="bg-emerald-500 text-[#0B0F10] px-8 py-4 rounded-2xl font-bold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-2 outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#0B0F10]">
+      <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+      طلب سحب رصيد
+    </button>
+  </header>
+
+  @if (isLoading()) {
+    <div class="flex justify-center py-20">
+      <span class="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></span>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-[#121718] border border-white/5 p-8 rounded-[2rem] shadow-xl relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-2xl rounded-full -mr-10 -mt-10"></div>
+        <p class="text-zinc-500 text-xs mb-2 font-bold uppercase tracking-wider relative z-10">الرصيد القابل للسحب</p>
+        <div class="flex items-baseline gap-2 relative z-10">
+          <span class="text-4xl font-black text-white">{{ stats()?.available?.toLocaleString() }}</span>
+          <span class="text-emerald-500 font-bold text-sm">ريال</span>
+        </div>
+      </div>
+
+      <div class="bg-[#121718] border border-white/5 p-8 rounded-[2rem] shadow-xl">
+        <p class="text-zinc-500 text-xs mb-2 font-bold uppercase tracking-wider">أرباح معلقة (تحت المراجعة)</p>
+        <div class="flex items-baseline gap-2">
+          <span class="text-4xl font-black text-white opacity-60">{{ stats()?.pending?.toLocaleString() }}</span>
+          <span class="text-zinc-600 font-bold text-sm">ريال</span>
+        </div>
+      </div>
+
+      <div class="bg-[#121718] border border-white/5 p-8 rounded-[2rem] shadow-xl">
+        <p class="text-zinc-500 text-xs mb-2 font-bold uppercase tracking-wider">إجمالي ما تم سحبه</p>
+        <div class="flex items-baseline gap-2">
+          <span class="text-4xl font-black text-white">{{ stats()?.withdrawn?.toLocaleString() }}</span>
+          <span class="text-zinc-600 font-bold text-sm">ريال</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="bg-[#121718] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl mt-8">
+      <div class="p-8 border-b border-white/5">
+        <h2 class="text-xl font-bold text-white">سجل العمليات المالية</h2>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-right">
+          <thead>
+            <tr class="text-zinc-500 text-sm bg-white/[0.02]">
+              <th class="px-8 py-5 font-medium">رقم العملية</th>
+              <th class="px-8 py-5 font-medium">النوع</th>
+              <th class="px-8 py-5 font-medium">المبلغ</th>
+              <th class="px-8 py-5 font-medium text-center">الوسيلة</th>
+              <th class="px-8 py-5 font-medium">التاريخ</th>
+              <th class="px-8 py-5 font-medium text-left">الحالة</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            @for (tx of transactions(); track tx.id) {
+              <tr class="hover:bg-white/[0.01] transition-colors">
+                <td class="px-8 py-6 font-mono text-zinc-400 text-xs">{{ tx.id }}</td>
+                <td class="px-8 py-6">
+                  <span [class.text-red-400]="tx.type === 'WITHDRAWAL'" [class.text-emerald-400]="tx.type === 'DEPOSIT'" class="font-bold text-sm">
+                    {{ tx.type === 'WITHDRAWAL' ? 'سحب رصيد' : 'إيداع أرباح' }}
+                  </span>
+                </td>
+                <td class="px-8 py-6 font-bold text-white">{{ tx.amount.toLocaleString() }} <span class="text-zinc-500 text-xs">ريال</span></td>
+                <td class="px-8 py-6 text-center text-zinc-500 text-xs">{{ tx.method }}</td>
+                <td class="px-8 py-6 text-zinc-500 text-xs">{{ tx.date }}</td>
+                <td class="px-8 py-6 text-left">
+                  <span class="px-3 py-1 rounded-full text-[10px] font-bold border"
+                        [ngClass]="{
+                          'bg-emerald-500/10 text-emerald-500 border-emerald-500/20': tx.status === 'COMPLETED',
+                          'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': tx.status === 'PENDING',
+                          'bg-red-500/10 text-red-500 border-red-500/20': tx.status === 'FAILED'
+                        }">
+                    {{ tx.status === 'COMPLETED' ? 'مكتملة' : tx.status === 'PENDING' ? 'قيد المعالجة' : 'مرفوضة' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-8 py-16 text-center text-zinc-600">لا توجد عمليات مالية مسجلة حتى الآن.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</main>
+
+@if (isWithdrawModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeWithdrawModal()"></div>
+    
+    <div class="relative bg-[#0B0F10] border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 animate-fade-in z-10">
+      
+      <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+        <h2 class="text-xl font-bold text-white">طلب سحب رصيد</h2>
+        <button (click)="closeWithdrawModal()" class="text-zinc-500 hover:text-white transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="submitWithdrawal()" class="space-y-6">
+        
+        <div class="space-y-2">
+          <label class="block text-xs font-medium text-zinc-400">المبلغ المطلوب سحبه (المتاح: {{ stats()?.available }} ريال)</label>
+          <div class="relative">
+            <input type="number" [(ngModel)]="withdrawAmount" name="amount" required
+                   class="w-full bg-[#121718] border border-white/5 rounded-xl p-4 text-white text-xl font-bold placeholder:text-zinc-800 focus:outline-none focus:border-emerald-500/50"
+                   placeholder="0.00">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">SAR</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-medium text-zinc-400">طريقة السحب</label>
+          <select [(ngModel)]="withdrawMethod" name="method"
+                  class="w-full bg-[#121718] border border-white/5 rounded-xl p-4 text-white focus:outline-none focus:border-emerald-500/50 appearance-none">
+            <option value="INSTAPAY">تحويل Instapay</option>
+            <option value="BANK_TRANSFER">تحويل بنكي مباشر</option>
+            <option value="WALLET">محفظة إلكترونية</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-medium text-zinc-400">تفاصيل الحساب (عنوان Instapay أو رقم الآيبان)</label>
+          <input type="text" [(ngModel)]="accountDetails" name="details" required
+                 class="w-full bg-[#121718] border border-white/5 rounded-xl p-4 text-white placeholder:text-zinc-800 focus:outline-none focus:border-emerald-500/50 text-left"
+                 dir="ltr"
+                 placeholder="مثال: name@instapay أو SA123456789...">
+        </div>
+
+        <div class="pt-4 flex gap-4">
+          <button type="submit" [disabled]="isSubmitting()"
+                  class="flex-1 bg-emerald-500 text-[#0B0F10] py-4 rounded-xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
+            @if (isSubmitting()) {
+              <span class="w-6 h-6 border-2 border-[#0B0F10]/20 border-t-[#0B0F10] rounded-full animate-spin"></span>
+            } @else {
+              تأكيد السحب
+            }
+          </button>
+          <button type="button" (click)="closeWithdrawModal()"
+                  class="px-6 py-4 rounded-xl font-bold text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 transition-all">
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

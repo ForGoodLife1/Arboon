@@ -1,0 +1,128 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { environment } from '../../../environments/environment.development';
+import { Dispute, DisputeMessage, OpenDisputePayload } from '../models/dispute.interface';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DisputeService {
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiUrl}/disputes`;
+
+  // جلب كل نزاعات المستقل
+  getSellerDisputes(): Observable<{ success: boolean; data: Dispute[] }> {
+    if (!environment.useMocks) {
+      return this.http.get<{ success: boolean; data: Dispute[] }>(this.baseUrl);
+    }
+
+    const mockDisputes: Dispute[] = [
+      {
+        id: 'disp_101',
+        escrow_id: '8a2b9c',
+        escrow_title: 'تصميم متجر إلكتروني',
+        reason: 'تأخر العميل في استلام العمل النهائي',
+        opened_by: 'Seller',
+        status: 'OPEN',
+        created_at: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: 'disp_102',
+        escrow_id: '9k2m1n',
+        escrow_title: 'حملة تسويقية',
+        reason: 'خلاف على جودة التصاميم الملحقة',
+        opened_by: 'Buyer',
+        status: 'RESOLVED',
+        created_at: new Date(Date.now() - 172800000).toISOString()
+      }
+    ];
+
+
+    return of({ success: true, data: mockDisputes }).pipe(delay(800));
+  }
+
+  // فتح نزاع جديد (للبائع - يحتاج JWT)
+  openDispute(payload: OpenDisputePayload): Observable<{ success: boolean; data: any }> {
+    if (!environment.useMocks) {
+      return this.http.post<{ success: boolean; data: any }>(this.baseUrl, payload);
+    }
+    return of({ success: true, data: { id: 'disp_' + Math.random().toString(36).substring(2, 7) } }).pipe(delay(1000));
+  }
+
+  // فتح نزاع جديد (للمشتري - يستخدم Token)
+  openBuyerDispute(payload: OpenDisputePayload & { buyer_token: string }): Observable<{ success: boolean; data: any }> {
+    if (!environment.useMocks) {
+      return this.http.post<{ success: boolean; data: any }>(`${this.baseUrl}/buyer`, payload);
+    }
+    return of({ success: true, data: { id: 'disp_buyer_' + Math.random().toString(36).substring(2, 7) } }).pipe(delay(1000));
+  }
+
+  // جلب بيانات نزاع واحد للمشتري (بدون JWT)
+  getBuyerDispute(id: string, buyerToken: string): Observable<{ success: boolean; data: Dispute }> {
+    if (!environment.useMocks) {
+      const params = new HttpParams().set('buyer_token', buyerToken);
+      return this.http.get<{ success: boolean; data: Dispute }>(`${this.baseUrl}/${id}`, { params });
+    }
+    
+    const mockDispute: Dispute = {
+      id: id,
+      escrow_id: '8a2b9c',
+      escrow_title: 'تصميم متجر إلكتروني',
+      escrow_amount: 5000,
+      escrow_currency: 'SAR',
+      reason: 'الخدمة غير مكتملة',
+      opened_by: 'Buyer',
+      status: 'OPEN',
+      created_at: new Date().toISOString()
+    };
+    return of({ success: true, data: mockDispute }).pipe(delay(500));
+  }
+
+  // جلب رسائل نزاع معين (يدعم Token للمشتري)
+  getDisputeMessages(disputeId: string, buyerToken?: string): Observable<{ success: boolean; data: DisputeMessage[] }> {
+    if (!environment.useMocks) {
+      let params = new HttpParams();
+      if (buyerToken) {
+        params = params.set('buyer_token', buyerToken);
+      }
+      return this.http.get<{ success: boolean; data: DisputeMessage[] }>(`${this.baseUrl}/${disputeId}/messages`, { params });
+    }
+
+    const mockMessages: DisputeMessage[] = [
+      { id: '1', dispute_id: disputeId, sender_type: 'Seller', message: 'لقد قمت بتسليم العمل المطلوب منذ يومين ولم يتم الرد.', created_at: new Date(Date.now() - 80000000).toISOString() },
+      { id: '2', dispute_id: disputeId, sender_type: 'Buyer', message: 'أحتاج لبعض التعديلات على الخطوط والألوان.', created_at: new Date(Date.now() - 70000000).toISOString() },
+      { id: '3', dispute_id: disputeId, sender_type: 'Admin', message: 'يرجى من الطرفين إرفاق الملفات النهائية للفحص.', created_at: new Date(Date.now() - 60000000).toISOString() }
+    ];
+
+    return of({ success: true, data: mockMessages }).pipe(delay(500));
+  }
+
+  // إرسال رسالة في الشات (يدعم Token للمشتري)
+  sendMessage(disputeId: string, message: string, attachment?: { url: string, name: string }, buyerToken?: string): Observable<{ success: boolean; data: any }> {
+    if (!environment.useMocks) {
+      const body: any = { 
+        message,
+        attachment_url: attachment?.url,
+        attachment_name: attachment?.name
+      };
+      if (buyerToken) body.buyer_token = buyerToken;
+
+      return this.http.post<{ success: boolean; data: any }>(`${this.baseUrl}/${disputeId}/messages`, body);
+    }
+    return of({ success: true, data: null }).pipe(delay(500));
+  }
+
+
+  // رفع ملف (Mock)
+  uploadAttachment(file: File): Observable<{ success: boolean; data: { url: string, name: string } }> {
+    // في الحقيقة ده بيرفع للسيرفر أو S3
+    // هنا هنعمل محاكاة
+    const mockData = {
+      url: URL.createObjectURL(file), // رابط مؤقت للمعاينة
+      name: file.name
+    };
+    return of({ success: true, data: mockData }).pipe(delay(1000));
+  }
+}
