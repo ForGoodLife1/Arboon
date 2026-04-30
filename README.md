@@ -59,38 +59,7 @@ curl -X POST https://localhost:5001/api/v1/escrows \
     "currency": "USD",
     "buyerEmail": "buyer@example.com",
     "conditions": "تسليم الموقع خلال 10 أيام"
-### 3. Escrows (`/api/v1/escrows`)
-- `POST /` - Create new escrow (Seller)
-- `GET /` - List escrows (Seller)
-- `GET /{id}` - Get escrow details (Seller/Buyer)
-- `POST /{id}/pay` - Process payment (Buyer)
-- `POST /{id}/release` - Confirm delivery and release funds (Buyer)
-- `POST /{id}/cancel` - Cancel pending escrow (Seller)
-
-### 4. Webhooks (`/api/v1/webhooks`)
-- `POST /` - Register new webhook endpoint (Seller)
-- `GET /` - List registered endpoints (Seller)
-- `DELETE /{id}` - Delete endpoint (Seller)
-- `GET /deliveries` - List webhook delivery history (Seller)
-- `GET /deliveries/{id}` - Get webhook delivery payload/response details (Seller)
-- `POST /deliveries/{id}/retry` - Manually retry a failed delivery (Seller)
-
-### 5. Disputes (`/api/v1/disputes`)
-- `POST /` - Open a dispute (Seller)
-- `GET /` - List all your disputes (Seller)
-- `POST /buyer` - Open a dispute using a Magic Link token (Buyer)
-- `POST /{id}/messages` - Add message to dispute (Seller/Buyer)
-- `GET /{id}/messages` - List dispute messages (Seller/Buyer)
-
-### 6. Admin Disputes (`/api/v1/admin/disputes`)
-- `GET /` - List all open disputes across platform (Admin)
-- `GET /{id}` - Get complete dispute details (Admin)
-- `POST /{id}/resolve` - Resolve a dispute (Admin)
-- `POST /{id}/messages` - Add admin message to dispute (Admin)lopment mode, the email containing the Magic Link is logged to the console.
-```bash
-curl -X POST https://localhost:5001/api/v1/escrows/YOUR_ESCROW_ID/pay \
-  -H "Content-Type: application/json" \
-  -d '{"cardToken": "tok_visa"}'
+  }'
 ```
 *(Copy the `id` of the created escrow)*
 
@@ -129,3 +98,154 @@ curl -X GET https://localhost:5001/api/v1/wallet/balance \
 - **Application:** Contains DTOs, Validation rules (FluentValidation), and core services (`AuthService`, `EscrowService`, `WalletService`). Uses abstractions (`IAppDbContext`, `IEmailService`, etc.).
 - **Infrastructure:** Implements abstractions. Includes `AppDbContext` (EF Core), configurations, migrations, JWT generation, and mock external services (Email, Payment).
 - **API:** Controllers, Swagger configuration, and global exception middleware to format domain exceptions into standard JSON error responses.
+
+---
+
+## Testing Webhooks Locally
+
+To test webhooks without deploying your API to the internet, you can use services like [webhook.site](https://webhook.site/) or [ngrok](https://ngrok.com/).
+
+### Option A: Using Webhook.site
+1. Go to [webhook.site](https://webhook.site/) and copy your unique URL.
+2. Register the endpoint in Arboon using the seller's JWT token:
+   ```bash
+   curl -X POST https://localhost:5001/api/v1/webhooks \
+     -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "url": "https://webhook.site/YOUR-UUID-HERE",
+       "secret": "my_super_secret_key",
+       "events": ["escrow.created", "escrow.funded", "escrow.released", "dispute.opened"]
+     }'
+   ```
+3. Trigger an event (like creating an escrow) and watch the payload arrive in real-time on webhook.site.
+
+### Option B: Using ngrok
+1. Run a local application on a specific port (e.g., `3000`).
+2. Expose it using ngrok: `ngrok http 3000`
+3. Copy the forwarding HTTPS URL from ngrok and register it via the `/api/v1/webhooks` endpoint.
+
+### Verifying Webhook Signatures
+
+The Arboon API sends an `Arboon-Signature` header (HMAC-SHA256) with every webhook delivery so you can verify the payload was genuinely sent by Arboon.
+
+**Example: Node.js (Express)**
+```javascript
+const crypto = require('crypto');
+const express = require('express');
+const app = express();
+
+app.post('/webhook', express.json(), (req, res) => {
+  const signatureHeader = req.headers['arboon-signature'];
+  const eventName = req.headers['arboon-event'];
+  const secret = 'my_super_secret_key'; // Same secret you used when registering
+
+  // 1. Get the raw hash from the header (format is 'sha256={hash}')
+  const hash = signatureHeader.replace('sha256=', '');
+
+  // 2. The string to hash: "arboon.{eventName}.{rawPayloadBody}"
+  const payloadString = JSON.stringify(req.body);
+  const dataToHash = `arboon.${eventName}.${payloadString}`;
+
+  // 3. Compute hash using HMAC SHA256
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(dataToHash);
+  const computedHash = hmac.digest('hex');
+
+  if (computedHash === hash) {
+    console.log('Valid signature! Processing webhook...', req.body);
+    res.status(200).send('OK');
+  } else {
+    console.error('Invalid signature!');
+    res.status(401).send('Unauthorized');
+  }
+});
+```
+
+**Example: C# (ASP.NET Core)**
+```csharp
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+
+[HttpPost("webhook")]
+public async Task<IActionResult> ReceiveWebhook()
+{
+    var signatureHeader = Request.Headers["Arboon-Signature"].ToString();
+    var eventName = Request.Headers["Arboon-Event"].ToString();
+    var secret = "my_super_secret_key";
+    
+    using var reader = new StreamReader(Request.Body);
+    var body = await reader.ReadToEndAsync();
+    
+    var hash = signatureHeader.Replace("sha256=", "");
+    var dataToHash = $"arboon.{eventName}.{body}";
+    
+    using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+    var computedHash = BitConverter.ToString(hmac.ComputeHash(Encoding.UTF8.GetBytes(dataToHash))).Replace("-", "").ToLowerInvariant();
+    
+    if (computedHash == hash)
+    {
+        // Valid webhook!
+        var payload = JsonSerializer.Deserialize<JsonElement>(body);
+        return Ok();
+    }
+    
+    return Unauthorized();
+}
+```
+
+---
+
+## Example Dispute Flow
+
+Disputes pause an escrow (status becomes `DISPUTED`) and require an admin to resolve. Here is the flow using `curl`.
+
+### 1. Buyer Opens a Dispute
+The buyer needs the `buyer_token` (from the payment cookie or directly).
+```bash
+curl -X POST https://localhost:5001/api/v1/disputes/buyer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "escrowId": "esc_123456789",
+    "reason": "The delivered work does not match the requirements.",
+    "buyerToken": "33333333-3333-3333-3333-333333333333"
+  }'
+```
+*(This triggers the `dispute.opened` webhook)*
+
+### 2. Seller and Buyer Discuss
+**Seller replies:**
+```bash
+curl -X POST https://localhost:5001/api/v1/disputes/YOUR_DISPUTE_ID/messages \
+  -H "Authorization: Bearer SELLER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I provided all requested revisions as per our agreement."
+  }'
+```
+
+**Buyer replies:**
+```bash
+curl -X POST https://localhost:5001/api/v1/disputes/YOUR_DISPUTE_ID/messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "No, the logo is completely different from the brief.",
+    "buyerToken": "33333333-3333-3333-3333-333333333333"
+  }'
+```
+
+### 3. Admin Resolves the Dispute
+An admin reviews the messages and resolves the dispute. They can choose `ReleasedToSeller` or `RefundedToBuyer`.
+
+First, login as the admin (email: `admin@arboon.app`, password: `Admin@123`) to get the admin token.
+```bash
+curl -X POST https://localhost:5001/api/v1/admin/disputes/YOUR_DISPUTE_ID/resolve \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resolution": "RefundedToBuyer",
+    "adminNote": "The seller failed to deliver the agreed-upon design. Refund issued."
+  }'
+```
+*(This updates the escrow status to `REFUNDED` and triggers the `dispute.resolved` webhook)*
