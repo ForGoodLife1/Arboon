@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Transaction, WalletStats, WithdrawalPayload } from '../../core/models/escrow.interface';
 import { EscrowService } from '../../core/services/escrow.service';
+import { AlertService } from '../../core/services/alert.service';
 
 @Component({
   selector: 'app-wallet',
@@ -12,6 +13,7 @@ import { EscrowService } from '../../core/services/escrow.service';
 })
 export class WalletComponent implements OnInit {
   private escrowService = inject(EscrowService);
+  private alertService = inject(AlertService);
 
   // حالة البيانات
   stats = signal<WalletStats | null>(null);
@@ -59,13 +61,13 @@ export class WalletComponent implements OnInit {
 
   submitWithdrawal() {
     if (!this.withdrawAmount || !this.accountDetails) {
-      alert('يرجى إدخال المبلغ وتفاصيل الحساب.');
+      this.alertService.error('يرجى إدخال المبلغ وتفاصيل الحساب.');
       return;
     }
 
     const maxAvailable = this.stats()?.available || 0;
     if (this.withdrawAmount > maxAvailable) {
-      alert('المبلغ المطلوب يتجاوز الرصيد المتاح للسحب!');
+      this.alertService.error('المبلغ المطلوب يتجاوز الرصيد المتاح للسحب!');
       return;
     }
 
@@ -81,7 +83,7 @@ export class WalletComponent implements OnInit {
       next: (res) => {
         this.isSubmitting.set(false);
         if (res.success) {
-          alert('تم تقديم طلب السحب بنجاح. سيتم مراجعته قريباً.');
+          this.alertService.success('تم تقديم طلب السحب بنجاح. سيتم مراجعته قريباً.');
           this.closeWithdrawModal();
           this.loadWallet(); // تحديث البيانات بعد السحب
         }
@@ -89,7 +91,6 @@ export class WalletComponent implements OnInit {
       error: (err) => {
         console.error('Withdrawal error:', err);
         this.isSubmitting.set(false);
-        alert('حدث خطأ أثناء تقديم الطلب.');
       }
     });
   }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { EscrowService } from '../../../core/services/escrow.service';
 import { CreateEscrowPayload } from '../../../core/models/escrow.interface';
+import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'app-create-escrow',
@@ -14,6 +15,7 @@ import { CreateEscrowPayload } from '../../../core/models/escrow.interface';
 })
 export class CreateEscrowComponent {
   private escrowService = inject(EscrowService);
+  private alertService = inject(AlertService);
 
   // ----------------------------------------
   // خصائص مرتبطة بالـ UI (ngModel)
@@ -48,7 +50,7 @@ export class CreateEscrowComponent {
   createLink() {
     // التحقق من البيانات الأساسية المطلوبة برمجياً وبزنس
     if (!this.title || !this.amount || !this.description) {
-      alert('يرجى إكمال البيانات الأساسية: العنوان، المبلغ، ووصف الخدمة.');
+      this.alertService.error('يرجى إكمال البيانات الأساسية: العنوان، المبلغ، ووصف الخدمة.');
       return;
     }
 
@@ -72,6 +74,7 @@ export class CreateEscrowComponent {
           this.isLoading = false;
           if (response.success) {
             this.createdId = response.data.id;
+            this.alertService.success('تم إنشاء رابط العُهدة بنجاح!');
             console.log('تم إنشاء العُهدة بنجاح، المعرف:', this.createdId);
           }
         }, 800);
@@ -79,7 +82,7 @@ export class CreateEscrowComponent {
       error: (err) => {
         console.error('فشل في إنشاء الرابط:', err);
         this.isLoading = false;
-        alert('حدث خطأ أثناء الاتصال بالسيرفر، يرجى المحاولة لاحقاً.');
+        // ملاحظة: الانترسيبتور هو اللي هيعرض رسالة الخطأ للمستخدم
       }
     });
   }
@@ -100,7 +103,7 @@ export class CreateEscrowComponent {
 
     navigator.clipboard.writeText(link).then(() => {
       // إشعار نجاح النسخ
-      alert('تم نسخ الرابط! أرسله الآن للمشتري لإتمام الدفع.');
+      this.alertService.success('تم نسخ الرابط! أرسله الآن للمشتري لإتمام الدفع.');
     }).catch(err => {
       console.error('فشل النسخ:', err);
     });

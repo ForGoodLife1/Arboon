@@ -48,17 +48,20 @@ export class EscrowService {
     const mockData: Escrow = {
       id: id,
       seller_name: 'أحمد محمود',
+      seller_avatar: 'https://ui-avatars.com/api/?name=Ahmed+Mahmoud&background=10B981&color=fff',
+      seller_rating: 4.8,
       title: 'تصميم هوية بصرية لشركة ألفا',
-      description: 'هذا المشروع يشمل تصميم الشعار.',
+      description: 'هذا المشروع يشمل تصميم الشعار، اختيار الألوان، وتصميم مطبوعات الشركة الأساسية (Business Cards, Letterheads).',
       amount: 1500,
       currency: 'SAR',
       status: 'PENDING',
       created_at: '2024-05-15',
-      conditions: 'يتم التسليم بعد 3 أيام من تجميد المبلغ.'
+      conditions: 'يتم التسليم بعد 3 أيام من تجميد المبلغ، ويحق للمشتري طلب تعديلين بحد أقصى.'
     };
 
     return of({ success: true, data: mockData }).pipe(delay(500));
   }
+
 
   payEscrow(id: string, payload: PaymentPayload): Observable<any> {
     if (!environment.useMocks) {

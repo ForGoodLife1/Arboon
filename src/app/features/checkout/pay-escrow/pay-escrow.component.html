@@ -93,38 +93,58 @@
       </section>
 
       <section class="w-full lg:w-[45%] bg-[#12181A] p-8 md:p-12 flex flex-col justify-center h-full min-h-200">
-        <div class="space-y-12">
-          <div class="space-y-6">
-            <div class="w-14 h-14 bg-[#10B981]/10 rounded-2xl flex items-center justify-center border border-[#10B981]/20">
-              <span class="material-symbols-outlined text-[#10B981] text-3xl" style="font-variation-settings: 'FILL' 1;">shield</span>
+        <div class="space-y-10">
+          <!-- Freelancer Card -->
+          <div class="flex items-center gap-5 p-6 bg-[#070A0B]/50 border border-white/5 rounded-3xl">
+            <img [src]="escrow()?.seller_avatar" class="w-16 h-16 rounded-2xl object-cover border-2 border-[#10B981]/20 shadow-lg" alt="Freelancer">
+            <div>
+              <p class="text-zinc-500 text-xs mb-1">صاحب الخدمة (المستقل)</p>
+              <h3 class="text-white font-bold text-lg leading-none mb-2">{{ escrow()?.seller_name }}</h3>
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-zinc-300 text-xs font-bold">{{ escrow()?.seller_rating }}</span>
+                <span class="text-zinc-600 text-xs mx-1">|</span>
+                <span class="text-emerald-500 text-[10px] font-bold uppercase tracking-wider">هوية موثقة</span>
+              </div>
             </div>
-            <h1 class="text-3xl font-bold text-[#10B981]">أموالك في أمان مع عُربون</h1>
-            <p class="text-zinc-400 text-sm leading-relaxed">نحن نضمن حماية حقوقك المالية من خلال نظام العهدة الذكي. لن يتم تحويل المبلغ إلا بعد موافقتك الصريحة.</p>
           </div>
 
-          <div class="glass-panel rounded-4xl p-8 space-y-6">
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-              <span class="material-symbols-outlined text-yellow-600">gavel</span>شروط المعاملة
+          <!-- Service Details -->
+          <div class="space-y-6">
+            <div class="w-14 h-14 bg-[#10B981]/10 rounded-2xl flex items-center justify-center border border-[#10B981]/20">
+              <span class="material-symbols-outlined text-[#10B981] text-3xl" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+            </div>
+            <div class="space-y-3">
+              <h1 class="text-2xl font-bold text-white">{{ escrow()?.title }}</h1>
+              <p class="text-zinc-400 text-sm leading-relaxed">{{ escrow()?.description }}</p>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="glass-panel rounded-4xl p-8 space-y-6 bg-white/[0.02] border border-white/5">
+            <h3 class="text-md font-bold text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-500">verified</span>شروط عقد الضمان
             </h3>
             <div class="space-y-4">
               <div class="flex gap-4 items-start">
-                <span class="material-symbols-outlined text-[#10B981] mt-1">check_circle</span>
+                <span class="material-symbols-outlined text-[#10B981] text-lg mt-0.5">check_circle</span>
                 <div>
-                  <p class="text-white font-bold text-sm mb-1">حجز المبلغ</p>
-                  <p class="text-zinc-500 text-xs">يتم حجز مبلغ {{ escrow()?.amount }} ريال في حساب عُربون الوسيط فوراً.</p>
+                  <p class="text-white font-bold text-xs mb-1">حماية المشتري</p>
+                  <p class="text-zinc-500 text-[10px] leading-relaxed">يتم حجز المبلغ في عُربون ولا يصل للمستقل إلا بعد تأكيدك للاستلام.</p>
                 </div>
               </div>
               <div class="flex gap-4 items-start">
-                <span class="material-symbols-outlined text-[#10B981] mt-1">check_circle</span>
+                <span class="material-symbols-outlined text-[#10B981] text-lg mt-0.5">check_circle</span>
                 <div>
-                  <p class="text-white font-bold text-sm mb-1">فترة الفحص</p>
-                  <p class="text-zinc-500 text-xs">لديك 48 ساعة لفحص الخدمة قبل تأكيد الإصدار.</p>
+                  <p class="text-white font-bold text-xs mb-1">شروط المستقل</p>
+                  <p class="text-zinc-500 text-[10px] leading-relaxed">{{ escrow()?.conditions }}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
     </div>
   </main>
@@ -149,7 +169,7 @@
          <p class="text-sm text-zinc-500 mb-6 leading-relaxed">بالضغط على "تحرير الأموال"، أنت تؤكد استلامك للخدمة المتفق عليها، وسيتم تحويل المبلغ فوراً إلى حساب المستقل. <span class="text-red-400">هذا الإجراء لا يمكن التراجع عنه.</span></p>
          
          <button type="button" (click)="release()" [disabled]="isProcessing()"
-                 class="w-full bg-[#10B981] text-[#070A0B] py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                 class="w-full bg-[#10B981] text-[#070A0B] py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-4">
             @if (!isProcessing()) {
               <span class="material-symbols-outlined">lock_open</span>
               تأكيد واستلام (تحرير الأموال)
@@ -158,7 +178,13 @@
               جاري التحرير...
             }
          </button>
+
+         <button type="button" (click)="openDispute()" [disabled]="isProcessing()"
+                 class="w-full bg-transparent text-red-500 py-3 rounded-xl font-medium hover:bg-red-500/5 transition-all text-sm border border-red-500/10">
+           لديك مشكلة؟ فتح نزاع أو اعتراض
+         </button>
        </div>
+
     </div>
   </main>
 }

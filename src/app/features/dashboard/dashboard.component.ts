@@ -1,13 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { EscrowService } from '../../core/services/escrow.service';
 import { Escrow } from '../../core/models/escrow.interface';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -20,9 +21,30 @@ export class DashboardComponent implements OnInit {
   pendingCount = signal<number>(0);
   activeEscrows = signal<Escrow[]>([]);
   
+  // حالة البحث والتصفية
+  searchTerm = signal<string>('');
+  statusFilter = signal<string>('ALL');
+
+  // الـ Signal المحسوب للتصفية التلقائية
+  filteredEscrows = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const status = this.statusFilter();
+    
+    return this.activeEscrows().filter(escrow => {
+      const matchesSearch = 
+        escrow.title.toLowerCase().includes(term) || 
+        escrow.id.toLowerCase().includes(term);
+      
+      const matchesStatus = status === 'ALL' || escrow.status === status;
+      
+      return matchesSearch && matchesStatus;
+    });
+  });
+
   // حالة الواجهة
   isLoading = signal<boolean>(true);
   showToast = signal<boolean>(true);
+
 
   ngOnInit() {
     this.loadDashboardData();

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LayoutService } from '../../../core/services/layout.service';
 import { EscrowService } from '../../../core/services/escrow.service'; 
+import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,7 +13,8 @@ import { EscrowService } from '../../../core/services/escrow.service';
 })
 export class NavbarComponent implements OnInit {
   layoutService = inject(LayoutService);
-  private escrowService = inject(EscrowService); // 👈 حقن السيرفيس
+  private escrowService = inject(EscrowService);
+  private alertService = inject(AlertService);
 
   isDarkMode = signal<boolean>(true);
   isLoggedIn = signal<boolean>(true);
@@ -44,7 +46,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logoutForDemo() {
-    alert('تم تسجيل الخروج مؤقتاً للتجربة!');
+    this.alertService.success('تم تسجيل الخروج مؤقتاً للتجربة!');
     this.isLoggedIn.set(false);
   }
   // حالة قائمة الإشعارات

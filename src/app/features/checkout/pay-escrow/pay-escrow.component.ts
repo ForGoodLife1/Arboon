@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EscrowService } from '../../../core/services/escrow.service';
 import { Escrow, PaymentPayload, PaymentMethod } from '../../../core/models/escrow.interface';
+import { AlertService } from '../../../core/services/alert.service';
+import { DisputeService } from '../../../core/services/dispute.service';
 
 @Component({
   selector: 'app-pay-escrow',
@@ -13,7 +15,10 @@ import { Escrow, PaymentPayload, PaymentMethod } from '../../../core/models/escr
 })
 export class PayEscrowComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private escrowService = inject(EscrowService);
+  private disputeService = inject(DisputeService);
+  private alertService = inject(AlertService);
 
   // استخدام Signals عشان الـ HTML بتاعك
   escrow = signal<Escrow | null>(null);
@@ -70,6 +75,7 @@ export class PayEscrowComponent implements OnInit {
       next: (res) => {
         this.isProcessing.set(false);
         if (res.success) {
+          this.alertService.success('تم إيداع الأموال بنجاح في العُهدة!');
           // تحديث الـ Signal
           this.escrow.update(e => e ? { ...e, status: 'FROZEN' } : null);
         }
@@ -80,12 +86,16 @@ export class PayEscrowComponent implements OnInit {
     });
   }
   // دالة تحرير الأموال (بيتم استدعاؤها من شاشة التجميد)
-  release() {
+  async release() {
     const currentEscrow = this.escrow();
     if (!currentEscrow) return;
 
     // رسالة التأكيد للمشتري
-    const confirmed = window.confirm('هل أنت متأكد من استلام العمل وتحرير الأموال للمستقل؟ لا يمكن التراجع عن هذا الإجراء.');
+    const confirmed = await this.alertService.confirm(
+      'تأكيد تحرير الأموال',
+      'هل أنت متأكد من استلام العمل وتحرير الأموال للمستقل؟ لا يمكن التراجع عن هذا الإجراء.',
+      'نعم، حرر الأموال'
+    );
     
     if (confirmed) {
       this.isProcessing.set(true); // تشغيل السبينر
@@ -94,6 +104,7 @@ export class PayEscrowComponent implements OnInit {
         next: (res) => {
           this.isProcessing.set(false); // إيقاف السبينر
           if (res.success) {
+            this.alertService.success('تم تحرير الأموال بنجاح للمستقل!');
             // تحديث الـ Signal لتغيير الشاشة فوراً إلى RELEASED (شاشة النجاح)
             this.escrow.update(e => e ? { ...e, status: 'RELEASED' } : null);
           }
@@ -101,9 +112,40 @@ export class PayEscrowComponent implements OnInit {
         error: (err) => {
           console.error('Release Error:', err);
           this.isProcessing.set(false);
-          alert('حدث خطأ أثناء تحرير الأموال، يرجى المحاولة مرة أخرى.');
         }
       });
+    }
+  }
+
+  // 👈 دالة فتح نزاع للمشتري
+  async openDispute() {
+    const currentEscrow = this.escrow();
+    if (!currentEscrow) return;
+
+    const reason = await this.alertService.input(
+      'فتح نزاع (اعتراض)',
+      'يرجى كتابة سبب الاعتراض ليقوم فريق عُربون بالتدخل وحل المشكلة...',
+      'إرسال الاعتراض'
+    );
+
+    if (reason) {
+      this.isProcessing.set(true);
+      
+      this.disputeService.openDispute({
+        escrow_id: currentEscrow.id,
+        reason: reason
+      }).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.alertService.success('تم تسجيل اعتراضك بنجاح. سيتم توجيهك لصفحة المحادثة.');
+            // 👈 توجيه المشتري لصفحة النزاع الخاصة به
+            this.router.navigate(['/dispute', res.data.id]);
+          }
+          this.isProcessing.set(false);
+        },
+        error: () => this.isProcessing.set(false)
+      });
+
     }
   }
 }

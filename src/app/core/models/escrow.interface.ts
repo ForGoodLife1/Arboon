@@ -9,6 +9,8 @@ export interface Escrow {
   title: string;
   description: string;
   seller_name?: string;
+  seller_avatar?: string;
+  seller_rating?: number;
   amount: number;
   currency: string;
   conditions?: string;
@@ -16,6 +18,7 @@ export interface Escrow {
   payment_url?: string;
   created_at: string;
 }
+
 
 export interface CreateEscrowPayload {
   title: string;

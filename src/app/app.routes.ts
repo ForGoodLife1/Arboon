@@ -7,11 +7,16 @@ import { DashboardComponent } from './features/dashboard/dashboard.component'; /
 import { EscrowDetailsComponent } from './features/escrow-details/escrow-details.component';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { WalletComponent } from './features/wallet/wallet.component';
+import { DisputeCenterComponent } from './features/dispute-center/dispute-center.component';
+
+import { BuyerDisputeComponent } from './features/dispute-center/buyer-dispute.component';
 
 export const routes: Routes = [
-// 1. مسار الدفع (مستقل تماماً وبدون السايد بار - للمشتري)
+  // 1. مسارات المشتري (مستقلة تماماً وبدون السايد بار)
   { path: 'pay/:id', component: PayEscrowComponent },
-  
+  { path: 'dispute/:id', component: BuyerDisputeComponent },
+
+
   // 2. المسارات المحمية اللي جواها السايد بار (للمستقل)
   {
     path: '',
@@ -19,9 +24,10 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'wallet', component: WalletComponent },
+      { path: 'dispute-center', component: DisputeCenterComponent },
       { path: 'create', component: CreateEscrowComponent },
       { path: 'escrow-details/:id', component: EscrowDetailsComponent },
-      
+
       // التوجيه الافتراضي لو دخل على الموقع مباشرة
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
