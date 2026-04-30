@@ -118,16 +118,16 @@
                 }
 
                 <form (ngSubmit)="sendMessage()" class="flex gap-3">
-                    <label class="cursor-pointer bg-[#121718] border border-white/10 w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white/5 transition-all">
+                    <input type="text" [ngModel]="newMessage()" (ngModelChange)="newMessage.set($event)" name="msg" placeholder="اكتب رسالتك هنا..."
+                        class="flex-1 bg-[#121718] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50">
+                    
+                    <label class="cursor-pointer bg-[#121718] border border-white/10 w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white/5 transition-all shrink-0">
                         <input type="file" class="hidden" (change)="onFileSelected($event)">
                         <span class="material-symbols-outlined text-zinc-400">attach_file</span>
                     </label>
 
-                    <input type="text" [ngModel]="newMessage()" (ngModelChange)="newMessage.set($event)" name="msg" placeholder="اكتب رسالتك هنا..."
-                        class="flex-1 bg-[#121718] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50">
-                    
                     <button type="submit" [disabled]="(!newMessage().trim() && !selectedFile()) || isSending()"
-                        class="bg-emerald-500 text-[#0B0F10] w-12 h-12 rounded-2xl flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-50">
+                        class="bg-emerald-500 text-[#0B0F10] w-12 h-12 rounded-2xl flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-50 shrink-0">
                         @if (isSending()) {
                         <span
                             class="w-5 h-5 border-2 border-[#0B0F10]/20 border-t-[#0B0F10] rounded-full animate-spin"></span>

@@ -19,8 +19,15 @@
         <div class="space-y-2">
           <div class="flex items-center gap-3">
             <h1 class="text-2xl md:text-3xl font-black text-white">{{ escrow()?.title }}</h1>
-            <span class="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-xs font-bold" role="status">
-              {{ escrow()?.status === 'FROZEN' ? 'أموال مؤمنة' : 'بانتظار الدفع' }}
+            <span class="px-3 py-1 rounded-full text-xs font-bold border" 
+                  [ngClass]="{
+                    'bg-emerald-500/10 text-emerald-500 border-emerald-500/20': escrow()?.status === 'FROZEN',
+                    'bg-yellow-500/10 text-yellow-500 border-yellow-500/20': escrow()?.status === 'PENDING',
+                    'bg-red-500/10 text-red-500 border-red-500/20': escrow()?.status === 'DISPUTED',
+                    'bg-zinc-500/10 text-zinc-500 border-zinc-500/20': escrow()?.status === 'REFUNDED'
+                  }"
+                  role="status">
+              {{ getStatusLabel(escrow()?.status || '') }}
             </span>
           </div>
           <p class="text-zinc-500 text-sm">
@@ -76,19 +83,29 @@
                       class="w-full bg-emerald-500 text-[#0B0F10] py-4 rounded-2xl font-bold hover:brightness-110 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#121718]">
                 إرسال طلب تحرير الأموال
               </button>
+            } @else if (escrow()?.status === 'DISPUTED') {
+              <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                <p class="text-red-500 text-sm font-bold mb-1">المعاملة قيد النزاع</p>
+                <p class="text-zinc-500 text-[10px]">لا يمكن تحرير الأموال حالياً حتى يتم الفصل في النزاع.</p>
+              </div>
+              <a routerLink="/dispute-center" class="inline-block w-full bg-white/5 text-white py-3 rounded-xl font-bold text-sm">
+                متابعة النزاع في المركز
+              </a>
             } @else {
               <button type="button" 
                       disabled
                       class="w-full bg-white/5 text-zinc-500 py-4 rounded-2xl font-bold cursor-not-allowed border border-white/5">
-                بانتظار إيداع المشتري
+                {{ escrow()?.status === 'PENDING' ? 'بانتظار إيداع المشتري' : 'المعاملة منتهية' }}
               </button>
             }
             
-            <button type="button" 
-                    (click)="openDispute()"
-                    class="w-full bg-transparent text-red-500/70 py-2 text-sm font-medium hover:text-red-500 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50 rounded-lg">
-              فتح نزاع أو اعتراض
-            </button>
+            @if (escrow()?.status === 'FROZEN') {
+              <button type="button" 
+                      (click)="openDispute()"
+                      class="w-full bg-transparent text-red-500/70 py-2 text-sm font-medium hover:text-red-500 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50 rounded-lg">
+                فتح نزاع أو اعتراض
+              </button>
+            }
 
           </div>
 

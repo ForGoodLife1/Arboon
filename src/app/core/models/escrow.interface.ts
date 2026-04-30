@@ -1,6 +1,6 @@
 // src/app/core/models/escrow.interface.ts
 
-export type EscrowStatus = 'PENDING' | 'FROZEN' | 'RELEASED' | 'CANCELLED';
+export type EscrowStatus = 'PENDING' | 'FROZEN' | 'RELEASED' | 'CANCELLED' | 'DISPUTED' | 'REFUNDED';
 
 export type PaymentMethod = 'CARD' | 'INSTAPAY' | 'WALLET' | 'PAYPAL';
 

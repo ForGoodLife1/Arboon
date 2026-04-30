@@ -18,7 +18,7 @@ export class EscrowDetailsComponent implements OnInit {
   private escrowService = inject(EscrowService);
   private disputeService = inject(DisputeService);
   private alertService = inject(AlertService);
-  
+
   escrow = signal<Escrow | null>(null);
   isLoading = signal(true);
 
@@ -59,6 +59,12 @@ export class EscrowDetailsComponent implements OnInit {
     const currentEscrow = this.escrow();
     if (!currentEscrow) return;
 
+    // 1. التحقق من الحالة (يجب أن تكون مجمدة)
+    if (currentEscrow.status !== 'FROZEN') {
+      this.alertService.error('عذراً، لا يمكن فتح نزاع إلا على العُهد المجمدة (FROZEN) فقط.');
+      return;
+    }
+
     const reason = await this.alertService.input(
       'فتح نزاع جديد',
       'يرجى كتابة سبب النزاع بالتفصيل ليتمكن فريق الإدارة من مراجعته...',
@@ -66,15 +72,20 @@ export class EscrowDetailsComponent implements OnInit {
     );
 
     if (reason) {
-      this.isLoading.set(true); // تشغيل لودينج بسيط
-      
+      this.isLoading.set(true);
+
       this.disputeService.openDispute({
         escrow_id: currentEscrow.id,
         reason: reason
       }).subscribe({
         next: (res) => {
           if (res.success) {
-            this.alertService.success('تم فتح النزاع بنجاح. سيتم توجيهك لمركز النزاعات.');
+            this.alertService.success('تم فتح النزاع بنجاح. سيتم توجيهك لمركز النزاعات لمتابعة القضية.');
+
+            // 2. تحديث الحالة محلياً
+            this.escrow.update(e => e ? { ...e, status: 'DISPUTED' } : null);
+
+            // 3. التوجيه لمركز النزاعات
             this.router.navigate(['/dispute-center']);
           }
           this.isLoading.set(false);
@@ -84,6 +95,18 @@ export class EscrowDetailsComponent implements OnInit {
           console.error('Dispute Error:', err);
         }
       });
+    }
+  }
+
+  // تسميات الحالة بالعربي
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'بانتظار الدفع';
+      case 'FROZEN': return 'أموال مؤمنة';
+      case 'RELEASED': return 'تم التسليم';
+      case 'DISPUTED': return 'نزاع مفتوح';
+      case 'REFUNDED': return 'تم الاسترداد';
+      default: return 'ملغاة';
     }
   }
 }

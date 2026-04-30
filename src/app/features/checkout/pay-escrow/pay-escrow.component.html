@@ -189,6 +189,39 @@
   </main>
 }
 
+@else if (escrow()?.status === 'DISPUTED') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
+    <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none"></div>
+      <div class="w-24 h-24 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-6 relative z-10 border border-red-500/20">
+        <span class="material-symbols-outlined text-red-500 text-5xl">gavel</span>
+      </div>
+      <h2 class="text-3xl font-black text-white mb-4 relative z-10">المعاملة في حالة نزاع</h2>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">الأموال مجمدة الآن ولا يمكن تحريرها أو استردادها حتى يتم حل النزاع من قبل فريق الإدارة. يمكنك متابعة النقاش في صفحة النزاع.</p>
+      
+      <a [routerLink]="['/dispute', 'active']" [queryParams]="{token: 'mock'}" class="inline-block w-full bg-red-500 text-white py-4 rounded-xl font-bold transition-all relative z-10 hover:brightness-110">
+        الذهاب لصفحة المحادثة
+      </a>
+    </div>
+  </main>
+}
+
+@else if (escrow()?.status === 'REFUNDED') {
+  <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
+    <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+      <div class="w-24 h-24 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center mb-6 relative z-10 border border-blue-500/20">
+        <span class="material-symbols-outlined text-blue-500 text-5xl">undo</span>
+      </div>
+      <h2 class="text-3xl font-black text-white mb-4 relative z-10">تم استرداد المبلغ</h2>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">تمت إعادة مبلغ <span class="text-white font-bold">{{ escrow()?.amount }} {{ escrow()?.currency }}</span> بنجاح إلى وسيلة الدفع الخاصة بك.</p>
+      
+      <a routerLink="/" class="inline-block w-full bg-white/5 border border-white/10 text-white py-4 rounded-xl font-bold transition-all relative z-10">
+        العودة للرئيسية
+      </a>
+    </div>
+  </main>
+}
+
 @else if (escrow()?.status === 'RELEASED') {
   <main class="min-h-screen flex items-center justify-center bg-[#070A0B] text-right p-4" dir="rtl">
     <div class="max-w-xl w-full bg-[#12181A] rounded-[3rem] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
@@ -200,7 +233,7 @@
       </div>
       
       <h2 class="text-3xl font-black text-white mb-4 relative z-10">تم إنهاء المعاملة!</h2>
-      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">تم تحرير مبلغ <span class="text-white font-bold">{{ escrow()?.amount }} ريال</span> بنجاح للمستقل. شكراً لاستخدامك منصة عُربون لحماية معاملاتك.</p>
+      <p class="text-zinc-400 mb-8 relative z-10 leading-relaxed">تم تحرير مبلغ <span class="text-white font-bold">{{ escrow()?.amount }} {{ escrow()?.currency }}</span> بنجاح للمستقل. شكراً لاستخدامك منصة عُربون لحماية معاملاتك.</p>
       
       <a routerLink="/" class="inline-block w-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white py-4 rounded-xl font-bold transition-all relative z-10">
         العودة للصفحة الرئيسية

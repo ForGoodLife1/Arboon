@@ -25,8 +25,12 @@ export class BuyerDisputeComponent implements OnInit {
   selectedFile = signal<File | null>(null);
   isUploading = signal(false);
 
+  buyerToken = '';
+
   ngOnInit() {
     const disputeId = this.route.snapshot.paramMap.get('id');
+    this.buyerToken = this.route.snapshot.queryParamMap.get('token') || '';
+
     if (disputeId) {
       this.loadDisputeData(disputeId);
     }
@@ -34,19 +38,24 @@ export class BuyerDisputeComponent implements OnInit {
 
   loadDisputeData(id: string) {
     this.isLoading.set(true);
-    this.disputeService.getSellerDisputes().subscribe(res => {
-      const found = res.data.find(d => d.id === id) || res.data[0];
-      this.dispute.set(found);
-      this.loadMessages(id);
+    this.disputeService.getBuyerDispute(id, this.buyerToken).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.dispute.set(res.data);
+          this.loadMessages(id);
+        }
+      },
+      error: () => this.isLoading.set(false)
     });
   }
 
   loadMessages(id: string) {
-    this.disputeService.getDisputeMessages(id).subscribe(res => {
+    this.disputeService.getDisputeMessages(id, this.buyerToken).subscribe(res => {
       this.messages.set(res.data);
       this.isLoading.set(false);
     });
   }
+
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -73,7 +82,7 @@ export class BuyerDisputeComponent implements OnInit {
       this.isUploading.set(false);
     }
 
-    this.disputeService.sendMessage(currentDispute.id, this.newMessage(), attachment).subscribe({
+    this.disputeService.sendMessage(currentDispute.id, this.newMessage(), attachment, this.buyerToken).subscribe({
       next: (res) => {
         if (res.success) {
           const newMsg: DisputeMessage = {
@@ -93,6 +102,7 @@ export class BuyerDisputeComponent implements OnInit {
       },
       error: () => this.isSending.set(false)
     });
+
   }
 }
 

@@ -74,6 +74,8 @@ export class DashboardComponent implements OnInit {
       case 'FROZEN': return 'lock_clock';
       case 'PENDING': return 'hourglass_empty';
       case 'RELEASED': return 'verified';
+      case 'DISPUTED': return 'gavel';
+      case 'REFUNDED': return 'undo';
       default: return 'receipt_long';
     }
   }
@@ -84,9 +86,12 @@ export class DashboardComponent implements OnInit {
       case 'PENDING': return 'بانتظار الدفع';
       case 'FROZEN': return 'أموال مؤمنة';
       case 'RELEASED': return 'تم التسليم';
+      case 'DISPUTED': return 'نزاع مفتوح';
+      case 'REFUNDED': return 'تم الاسترداد';
       default: return 'ملغاة';
     }
   }
+
 
   closeToast() {
     this.showToast.set(false);

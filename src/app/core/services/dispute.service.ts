@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment.development';
@@ -43,18 +43,51 @@ export class DisputeService {
     return of({ success: true, data: mockDisputes }).pipe(delay(800));
   }
 
-  // فتح نزاع جديد (للعُهد المجمدة فقط)
+  // فتح نزاع جديد (للبائع - يحتاج JWT)
   openDispute(payload: OpenDisputePayload): Observable<{ success: boolean; data: any }> {
     if (!environment.useMocks) {
       return this.http.post<{ success: boolean; data: any }>(this.baseUrl, payload);
     }
-    return of({ success: true, data: { id: 'disp_' + Math.random() } }).pipe(delay(1000));
+    return of({ success: true, data: { id: 'disp_' + Math.random().toString(36).substring(2, 7) } }).pipe(delay(1000));
   }
 
-  // جلب رسائل نزاع معين
-  getDisputeMessages(disputeId: string): Observable<{ success: boolean; data: DisputeMessage[] }> {
+  // فتح نزاع جديد (للمشتري - يستخدم Token)
+  openBuyerDispute(payload: OpenDisputePayload & { buyer_token: string }): Observable<{ success: boolean; data: any }> {
     if (!environment.useMocks) {
-      return this.http.get<{ success: boolean; data: DisputeMessage[] }>(`${this.baseUrl}/${disputeId}/messages`);
+      return this.http.post<{ success: boolean; data: any }>(`${this.baseUrl}/buyer`, payload);
+    }
+    return of({ success: true, data: { id: 'disp_buyer_' + Math.random().toString(36).substring(2, 7) } }).pipe(delay(1000));
+  }
+
+  // جلب بيانات نزاع واحد للمشتري (بدون JWT)
+  getBuyerDispute(id: string, buyerToken: string): Observable<{ success: boolean; data: Dispute }> {
+    if (!environment.useMocks) {
+      const params = new HttpParams().set('buyer_token', buyerToken);
+      return this.http.get<{ success: boolean; data: Dispute }>(`${this.baseUrl}/${id}`, { params });
+    }
+    
+    const mockDispute: Dispute = {
+      id: id,
+      escrow_id: '8a2b9c',
+      escrow_title: 'تصميم متجر إلكتروني',
+      escrow_amount: 5000,
+      escrow_currency: 'SAR',
+      reason: 'الخدمة غير مكتملة',
+      opened_by: 'Buyer',
+      status: 'OPEN',
+      created_at: new Date().toISOString()
+    };
+    return of({ success: true, data: mockDispute }).pipe(delay(500));
+  }
+
+  // جلب رسائل نزاع معين (يدعم Token للمشتري)
+  getDisputeMessages(disputeId: string, buyerToken?: string): Observable<{ success: boolean; data: DisputeMessage[] }> {
+    if (!environment.useMocks) {
+      let params = new HttpParams();
+      if (buyerToken) {
+        params = params.set('buyer_token', buyerToken);
+      }
+      return this.http.get<{ success: boolean; data: DisputeMessage[] }>(`${this.baseUrl}/${disputeId}/messages`, { params });
     }
 
     const mockMessages: DisputeMessage[] = [
@@ -66,17 +99,21 @@ export class DisputeService {
     return of({ success: true, data: mockMessages }).pipe(delay(500));
   }
 
-  // إرسال رسالة في الشات
-  sendMessage(disputeId: string, message: string, attachment?: { url: string, name: string }): Observable<{ success: boolean; data: any }> {
+  // إرسال رسالة في الشات (يدعم Token للمشتري)
+  sendMessage(disputeId: string, message: string, attachment?: { url: string, name: string }, buyerToken?: string): Observable<{ success: boolean; data: any }> {
     if (!environment.useMocks) {
-      return this.http.post<{ success: boolean; data: any }>(`${this.baseUrl}/${disputeId}/messages`, { 
+      const body: any = { 
         message,
         attachment_url: attachment?.url,
         attachment_name: attachment?.name
-      });
+      };
+      if (buyerToken) body.buyer_token = buyerToken;
+
+      return this.http.post<{ success: boolean; data: any }>(`${this.baseUrl}/${disputeId}/messages`, body);
     }
     return of({ success: true, data: null }).pipe(delay(500));
   }
+
 
   // رفع ملف (Mock)
   uploadAttachment(file: File): Observable<{ success: boolean; data: { url: string, name: string } }> {

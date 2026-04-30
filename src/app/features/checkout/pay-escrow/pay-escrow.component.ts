@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EscrowService } from '../../../core/services/escrow.service';
 import { Escrow, PaymentPayload, PaymentMethod } from '../../../core/models/escrow.interface';
 import { AlertService } from '../../../core/services/alert.service';
@@ -10,9 +10,10 @@ import { DisputeService } from '../../../core/services/dispute.service';
 @Component({
   selector: 'app-pay-escrow',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './pay-escrow.component.html'
 })
+
 export class PayEscrowComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -67,7 +68,7 @@ export class PayEscrowComponent implements OnInit {
 
     const payload: PaymentPayload = {
       // بنحول 'card' لـ 'CARD' عشان تطابق الـ Interface
-      payment_method: this.selectedMethod.toUpperCase() as PaymentMethod, 
+      payment_method: this.selectedMethod.toUpperCase() as PaymentMethod,
       buyer_email: this.buyerEmail
     };
 
@@ -96,7 +97,7 @@ export class PayEscrowComponent implements OnInit {
       'هل أنت متأكد من استلام العمل وتحرير الأموال للمستقل؟ لا يمكن التراجع عن هذا الإجراء.',
       'نعم، حرر الأموال'
     );
-    
+
     if (confirmed) {
       this.isProcessing.set(true); // تشغيل السبينر
 
@@ -122,6 +123,12 @@ export class PayEscrowComponent implements OnInit {
     const currentEscrow = this.escrow();
     if (!currentEscrow) return;
 
+    // 1. التحقق من حالة العُهدة (يجب أن تكون مجمدة)
+    if (currentEscrow.status !== 'FROZEN') {
+      this.alertService.error('عذراً، لا يمكن فتح نزاع إلا على المعاملات التي تم دفعها وتأمين مبالغها بالفعل.');
+      return;
+    }
+
     const reason = await this.alertService.input(
       'فتح نزاع (اعتراض)',
       'يرجى كتابة سبب الاعتراض ليقوم فريق عُربون بالتدخل وحل المشكلة...',
@@ -130,22 +137,32 @@ export class PayEscrowComponent implements OnInit {
 
     if (reason) {
       this.isProcessing.set(true);
-      
-      this.disputeService.openDispute({
+
+      // استخراج التوكن من الرابط إن وجد
+      const token = this.route.snapshot.queryParamMap.get('token') || 'mock_token_123';
+
+      this.disputeService.openBuyerDispute({
         escrow_id: currentEscrow.id,
-        reason: reason
+        reason: reason,
+        buyer_token: token
       }).subscribe({
         next: (res) => {
           if (res.success) {
-            this.alertService.success('تم تسجيل اعتراضك بنجاح. سيتم توجيهك لصفحة المحادثة.');
-            // 👈 توجيه المشتري لصفحة النزاع الخاصة به
-            this.router.navigate(['/dispute', res.data.id]);
+            this.alertService.success('تم تسجيل اعتراضك بنجاح. سيتم توجيهك لصفحة المحادثة لمتابعة الحل.');
+
+            // 2. تحديث الحالة محلياً إلى DISPUTED
+            this.escrow.update(e => e ? { ...e, status: 'DISPUTED' } : null);
+
+            // 3. التوجيه لصفحة الشات مع التوكن
+            this.router.navigate(['/dispute', res.data.id], {
+              queryParams: { token: token }
+            });
           }
           this.isProcessing.set(false);
         },
         error: () => this.isProcessing.set(false)
       });
-
     }
   }
+
 }

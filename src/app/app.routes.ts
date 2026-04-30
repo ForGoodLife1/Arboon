@@ -1,32 +1,41 @@
 import { Routes } from '@angular/router';
 
-// استدعاء الشاشات (تأكد من مسار الملفات حسب مجلداتك)
-import { CreateEscrowComponent } from './features/escrow/create-escrow/create-escrow.component';
-import { PayEscrowComponent } from './features/checkout/pay-escrow/pay-escrow.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component'; // 👈 ضفنا الداشبورد اللي لسه عاملينه
-import { EscrowDetailsComponent } from './features/escrow-details/escrow-details.component';
-import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
-import { WalletComponent } from './features/wallet/wallet.component';
-import { DisputeCenterComponent } from './features/dispute-center/dispute-center.component';
-
-import { BuyerDisputeComponent } from './features/dispute-center/buyer-dispute.component';
-
 export const routes: Routes = [
   // 1. مسارات المشتري (مستقلة تماماً وبدون السايد بار)
-  { path: 'pay/:id', component: PayEscrowComponent },
-  { path: 'dispute/:id', component: BuyerDisputeComponent },
-
+  {
+    path: 'pay/:id',
+    loadComponent: () => import('./features/checkout/pay-escrow/pay-escrow.component').then(c => c.PayEscrowComponent)
+  },
+  {
+    path: 'dispute/:id',
+    loadComponent: () => import('./features/dispute-center/buyer-dispute.component').then(c => c.BuyerDisputeComponent)
+  },
 
   // 2. المسارات المحمية اللي جواها السايد بار (للمستقل)
   {
     path: '',
-    component: MainLayoutComponent, // القالب الرئيسي هو الأب
+    loadComponent: () => import('./shared/layouts/main-layout/main-layout.component').then(c => c.MainLayoutComponent),
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'wallet', component: WalletComponent },
-      { path: 'dispute-center', component: DisputeCenterComponent },
-      { path: 'create', component: CreateEscrowComponent },
-      { path: 'escrow-details/:id', component: EscrowDetailsComponent },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(c => c.DashboardComponent)
+      },
+      {
+        path: 'wallet',
+        loadComponent: () => import('./features/wallet/wallet.component').then(c => c.WalletComponent)
+      },
+      {
+        path: 'dispute-center',
+        loadComponent: () => import('./features/dispute-center/dispute-center.component').then(c => c.DisputeCenterComponent)
+      },
+      {
+        path: 'create',
+        loadComponent: () => import('./features/escrow/create-escrow/create-escrow.component').then(c => c.CreateEscrowComponent)
+      },
+      {
+        path: 'escrow-details/:id',
+        loadComponent: () => import('./features/escrow-details/escrow-details.component').then(c => c.EscrowDetailsComponent)
+      },
 
       // التوجيه الافتراضي لو دخل على الموقع مباشرة
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
@@ -36,3 +45,4 @@ export const routes: Routes = [
   // 3. مسار الخطأ (404)
   { path: '**', redirectTo: 'dashboard' }
 ];
+
