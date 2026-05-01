@@ -1,7 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment.development';
 import { 
   Escrow, 
@@ -17,6 +18,7 @@ import {
 })
 export class EscrowService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   private baseUrl = `${environment.apiUrl}/escrows`;
 
   createEscrow(data: CreateEscrowPayload): Observable<{ success: boolean; data: Escrow }> {
@@ -32,7 +34,7 @@ export class EscrowService {
       currency: data.currency,
       conditions: data.conditions || '',
       status: 'PENDING',
-      payment_url: `https://arboon.app/pay/esc_mock_123`,
+      payment_url: isPlatformBrowser(this.platformId) ? `${window.location.origin}/pay/esc_mock_123` : '',
       created_at: new Date().toISOString(),
       seller_name: 'أنت (البائع)' 
     };
@@ -65,7 +67,7 @@ export class EscrowService {
 
   payEscrow(id: string, payload: PaymentPayload): Observable<any> {
     if (!environment.useMocks) {
-      return this.http.post<any>(`${this.baseUrl}/${id}/pay`, payload);
+      return this.http.post<any>(`${this.baseUrl}/${id}/pay`, payload, { withCredentials: true });
     }
     return of({ 
       success: true, 
@@ -74,9 +76,10 @@ export class EscrowService {
     }).pipe(delay(1000));
   }
 
-  releaseEscrow(id: string): Observable<any> {
+  releaseEscrow(id: string, buyerToken?: string): Observable<any> {
     if (!environment.useMocks) {
-      return this.http.post(`${this.baseUrl}/${id}/release`, {});
+      const body = buyerToken ? { buyer_token: buyerToken } : {};
+      return this.http.post(`${this.baseUrl}/${id}/release`, body, { withCredentials: true });
     }
     return of({ success: true, message: 'تم تحرير الأموال بنجاح.' }).pipe(delay(1000));
   }

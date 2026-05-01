@@ -58,6 +58,15 @@ public class DisputesController : ControllerBase
     }
 
     // Public (Buyer with token)
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ApiResponse<DisputeDetailDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _disputeService.GetByIdAsync(id);
+        return Ok(ApiResponse<DisputeDetailDto>.SuccessResponse(result));
+    }
+
+    // Public (Buyer with token)
     [HttpPost("buyer")]
     [ProducesResponseType(typeof(ApiResponse<DisputeResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> OpenByBuyer([FromBody] OpenDisputeBuyerDto dto)

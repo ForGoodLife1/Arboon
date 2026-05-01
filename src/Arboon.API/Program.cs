@@ -119,7 +119,7 @@ try
     // ──────────────────────────────────────────
     // Authorization
     // ──────────────────────────────────────────
-    builder.Services.AddAuthorization();
+    // builder.Services.AddAuthorization();
 
     var app = builder.Build();
 
@@ -147,10 +147,13 @@ try
         options.RoutePrefix = "swagger";
     });
 
-    app.UseHttpsRedirection();
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
     app.UseCors("AllowFrontend");
-    app.UseAuthentication();
-    app.UseAuthorization();
+    // app.UseAuthentication();
+    // app.UseAuthorization();
     app.MapControllers();
 
     // ──────────────────────────────────────────

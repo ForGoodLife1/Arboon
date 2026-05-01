@@ -99,7 +99,7 @@ public class EscrowService : IEscrowService
         // 1. Validate escrow is PENDING (domain method handles this)
         // 2. Process payment
         var paymentSuccess = await _paymentService.ProcessPaymentAsync(
-            dto.CardToken, escrow.TotalToPay, escrow.Currency);
+            dto.CardToken ?? string.Empty, escrow.TotalToPay, escrow.Currency);
 
         if (!paymentSuccess)
             throw new PaymentFailedException("فشلت عملية معالجة الدفع");

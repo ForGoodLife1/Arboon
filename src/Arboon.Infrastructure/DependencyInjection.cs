@@ -28,6 +28,7 @@ public static class DependencyInjection
         // Register IAppDbContext
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
+        /* 
         // JWT Authentication
         var jwtSettings = configuration.GetSection("JwtSettings");
         var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
@@ -51,6 +52,7 @@ public static class DependencyInjection
                 ClockSkew = TimeSpan.Zero
             };
         });
+        */
 
         // Infrastructure services
         services.AddScoped<IJwtService, JwtService>();

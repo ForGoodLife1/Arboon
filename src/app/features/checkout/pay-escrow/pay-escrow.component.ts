@@ -36,6 +36,7 @@ export class PayEscrowComponent implements OnInit {
   ipaAddress: string = '';
   walletNumber: string = '';
   paypalEmail: string = '';
+  buyerToken: string = ''; // 👈 حفظ التوكن
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -77,6 +78,9 @@ export class PayEscrowComponent implements OnInit {
         this.isProcessing.set(false);
         if (res.success) {
           this.alertService.success('تم إيداع الأموال بنجاح في العُهدة!');
+          if (res.data && res.data.buyer_token) {
+             this.buyerToken = res.data.buyer_token;
+          }
           // تحديث الـ Signal
           this.escrow.update(e => e ? { ...e, status: 'FROZEN' } : null);
         }
@@ -91,6 +95,10 @@ export class PayEscrowComponent implements OnInit {
     const currentEscrow = this.escrow();
     if (!currentEscrow) return;
 
+    // استخراج التوكن من الذاكرة أو الرابط
+    const urlToken = this.route.snapshot.queryParamMap.get('token');
+    const tokenToUse = this.buyerToken || urlToken || undefined;
+
     // رسالة التأكيد للمشتري
     const confirmed = await this.alertService.confirm(
       'تأكيد تحرير الأموال',
@@ -101,7 +109,7 @@ export class PayEscrowComponent implements OnInit {
     if (confirmed) {
       this.isProcessing.set(true); // تشغيل السبينر
 
-      this.escrowService.releaseEscrow(currentEscrow.id).subscribe({
+      this.escrowService.releaseEscrow(currentEscrow.id, tokenToUse).subscribe({
         next: (res) => {
           this.isProcessing.set(false); // إيقاف السبينر
           if (res.success) {
@@ -136,15 +144,21 @@ export class PayEscrowComponent implements OnInit {
     );
 
     if (reason) {
+      if (reason.length < 10) {
+        this.alertService.error('يجب أن يكون سبب الاعتراض 10 أحرف على الأقل لشرح المشكلة بوضوح.');
+        return;
+      }
+
       this.isProcessing.set(true);
 
-      // استخراج التوكن من الرابط إن وجد
-      const token = this.route.snapshot.queryParamMap.get('token') || '';
+      // استخراج التوكن من الذاكرة أو الرابط
+      const urlToken = this.route.snapshot.queryParamMap.get('token') || '';
+      const tokenToUse = this.buyerToken || urlToken;
 
       this.disputeService.openBuyerDispute({
         escrow_id: currentEscrow.id,
         reason: reason,
-        buyer_token: token
+        buyer_token: tokenToUse
       }).subscribe({
         next: (res) => {
           if (res.success) {
@@ -155,7 +169,7 @@ export class PayEscrowComponent implements OnInit {
 
             // 3. التوجيه لصفحة الشات مع التوكن
             this.router.navigate(['/dispute', res.data.id], {
-              queryParams: { token: token }
+              queryParams: { token: tokenToUse }
             });
           }
           this.isProcessing.set(false);

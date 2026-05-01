@@ -116,7 +116,7 @@
             <p class="text-zinc-500 text-xs font-bold">رابط الدفع الخاص بالمشتري:</p>
             <div class="flex items-center gap-2 bg-[#0B0F10] p-3 rounded-xl border border-white/5 focus-within:border-emerald-500/50 transition-colors">
               <span class="text-zinc-400 text-[10px] truncate flex-1 text-left select-all" dir="ltr">
-                arboon.app/pay/{{ escrow()?.id }}
+                {{ escrow()?.payment_url || (origin + '/pay/' + escrow()?.id) }}
               </span>
               <button type="button" 
                       (click)="copyLink()" 

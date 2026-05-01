@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { EscrowService } from '../../../core/services/escrow.service';
 import { CreateEscrowPayload } from '../../../core/models/escrow.interface';
 import { AlertService } from '../../../core/services/alert.service';
@@ -16,6 +16,8 @@ import { AlertService } from '../../../core/services/alert.service';
 export class CreateEscrowComponent {
   private escrowService = inject(EscrowService);
   private alertService = inject(AlertService);
+  private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   // ----------------------------------------
   // خصائص مرتبطة بالـ UI (ngModel)
@@ -31,6 +33,7 @@ export class CreateEscrowComponent {
   // ----------------------------------------
   isLoading: boolean = false;
   createdId: string | null = null;
+  createdPaymentUrl: string | null = null;
 
   // ----------------------------------------
   // الدوال (Methods)
@@ -69,15 +72,23 @@ export class CreateEscrowComponent {
 
     this.escrowService.createEscrow(payload).subscribe({
       next: (response) => {
-        // تأخير بسيط (800ms) لضمان تجربة مستخدم سلسة (UX)
-        setTimeout(() => {
-          this.isLoading = false;
-          if (response.success) {
-            this.createdId = response.data.id;
-            this.alertService.success('تم إنشاء رابط العُهدة بنجاح!');
-            console.log('تم إنشاء العُهدة بنجاح، المعرف:', this.createdId);
+        this.isLoading = false;
+        if (response.success) {
+          this.createdId = response.data.id;
+          this.createdPaymentUrl = response.data.payment_url || null;
+          this.alertService.success('تم إنشاء رابط العُهدة بنجاح!');
+          console.log('تم إنشاء العُهدة بنجاح، المعرف:', this.createdId);
+          
+          // تأخير بسيط للانتقال لضمان رؤية رسالة النجاح وتجربة سلسة
+          setTimeout(() => {
+            this.router.navigate(['/escrow-details', this.createdId]);
+          }, 1500);
+
+          // التمرير لأعلى بسلاسة لتجنب القفز المفاجئ (Scroll Jump)
+          if (isPlatformBrowser(this.platformId)) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
-        }, 800);
+        }
       },
       error: (err) => {
         console.error('فشل في إنشاء الرابط:', err);
@@ -91,7 +102,8 @@ export class CreateEscrowComponent {
    * توليد الرابط النهائي المخصص للمشتري
    */
   getLink(): string {
-    return this.createdId ? `https://arboon.app/pay/${this.createdId}` : '';
+    const origin = isPlatformBrowser(this.platformId) ? window.location.origin : '';
+    return this.createdPaymentUrl || (this.createdId ? `${origin}/pay/${this.createdId}` : '');
   }
 
   /**
@@ -99,14 +111,15 @@ export class CreateEscrowComponent {
    */
   copyLink() {
     const link = this.getLink();
-    if (!link) return;
-
-    navigator.clipboard.writeText(link).then(() => {
-      // إشعار نجاح النسخ
-      this.alertService.success('تم نسخ الرابط! أرسله الآن للمشتري لإتمام الدفع.');
-    }).catch(err => {
-      console.error('فشل النسخ:', err);
-    });
+    // النسخ إلى الحافظة (Clipboard)
+    if (isPlatformBrowser(this.platformId) && navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => {
+        // إشعار نجاح النسخ
+        this.alertService.success('تم نسخ الرابط! أرسله الآن للمشتري لإتمام الدفع.');
+      }).catch(err => {
+        console.error('فشل النسخ:', err);
+      });
+    }
   }
 
   /**

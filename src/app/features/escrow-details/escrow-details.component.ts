@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { EscrowService } from '../../core/services/escrow.service';
 import { Escrow, EscrowStatus } from '../../core/models/escrow.interface';
@@ -19,10 +20,15 @@ export class EscrowDetailsComponent implements OnInit {
   private disputeService = inject(DisputeService);
   private alertService = inject(AlertService);
 
+  private platformId = inject(PLATFORM_ID);
   escrow = signal<Escrow | null>(null);
   isLoading = signal(true);
+  origin = '';
 
   ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.origin = window.location.origin;
+    }
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.escrowService.getEscrow(id).subscribe({
@@ -44,14 +50,16 @@ export class EscrowDetailsComponent implements OnInit {
     if (!currentEscrow) return;
 
     // تجميع الرابط الكامل
-    const link = `https://arboon.app/pay/${currentEscrow.id}`;
+    const link = currentEscrow.payment_url || `${this.origin}/pay/${currentEscrow.id}`;
 
     // النسخ إلى الحافظة (Clipboard)
-    navigator.clipboard.writeText(link).then(() => {
-      this.alertService.success('تم نسخ رابط الدفع بنجاح! يمكنك إرساله للمشتري.');
-    }).catch(err => {
-      console.error('فشل في نسخ الرابط:', err);
-    });
+    if (isPlatformBrowser(this.platformId) && navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => {
+        this.alertService.success('تم نسخ رابط الدفع بنجاح! يمكنك إرساله للمشتري.');
+      }).catch(err => {
+        console.error('فشل في نسخ الرابط:', err);
+      });
+    }
   }
 
   // 👈 دالة فتح نزاع جديد
@@ -73,6 +81,11 @@ export class EscrowDetailsComponent implements OnInit {
     );
 
     if (reason) {
+      if (reason.length < 10) {
+        this.alertService.error('يجب أن يكون سبب النزاع 10 أحرف على الأقل لشرح المشكلة بوضوح.');
+        return;
+      }
+
       this.isLoading.set(true);
 
       this.disputeService.openDispute({

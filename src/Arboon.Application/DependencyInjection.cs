@@ -13,7 +13,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         // AutoMapper
-        services.AddAutoMapper(typeof(DependencyInjection).Assembly);
+        services.AddAutoMapper(cfg => cfg.AddMaps(typeof(DependencyInjection).Assembly));
 
         // FluentValidation - register all validators from this assembly
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

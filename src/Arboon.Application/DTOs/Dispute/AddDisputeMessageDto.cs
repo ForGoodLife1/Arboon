@@ -8,5 +8,12 @@ public class AddDisputeMessageDto
     public string Message { get; set; } = string.Empty;
 
     [JsonPropertyName("buyer_token")]
-    public Guid? BuyerToken { get; set; }
+    public string? BuyerTokenString { get; set; }
+
+    [JsonIgnore]
+    public Guid? BuyerToken
+    {
+        get => Guid.TryParse(BuyerTokenString, out var g) ? g : null;
+        set => BuyerTokenString = value?.ToString();
+    }
 }

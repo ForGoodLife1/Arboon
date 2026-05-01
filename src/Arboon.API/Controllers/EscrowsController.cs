@@ -131,8 +131,8 @@ public class EscrowsController : ControllerBase
                 Response.Cookies.Append("arboon_buyer_token", buyerToken.ToString(), new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Lax,
+                    Secure = true, // Must be true for SameSite=None
+                    SameSite = SameSiteMode.None, // Allow cross-origin requests to send the cookie
                     Expires = DateTimeOffset.UtcNow.AddDays(30),
                     Path = "/"
                 });
