@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عُربون - العرض النهائي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#10B981',
+                        surface: '#0e1511',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: #dde4dd;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.1);
+        }
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            filter: blur(60px);
+        }
+        .dot-texture {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.2;
+            mix-blend-mode: overlay;
+            background: radial-gradient(#ffffff0a 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: -1;
+        }
+        .emerald-glow {
+            box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+<body class="relative min-h-screen">
+    <!-- Background Effects -->
+    <div class="aurora-bg"></div>
+    <div class="dot-texture"></div>
+
+    <!-- Header / Hero Section -->
+    <header class="pt-12 pb-16 px-6 text-center">
+        <!-- Salam Hack Info -->
+        <div class="flex flex-col items-center gap-3 mb-10">
+            <div class="inline-flex items-center gap-2 bg-[#121718] border border-white/10 rounded-full py-2 px-6 shadow-lg shadow-black/50 hover:border-primary/50 transition-colors">
+                <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-zinc-300 font-bold tracking-wide text-sm md:text-base">سلام هاك - العرض النهائي</span>
+            </div>
+            <div class="text-primary/80 font-bold tracking-wider text-sm flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">calendar_month</span>
+                27 April - 1 May 2026
+            </div>
+            <div class="mt-4 flex flex-col items-center gap-3">
+                <span class="text-xs text-zinc-500 font-bold tracking-widest uppercase">برعاية</span>
+                <div class="flex flex-wrap justify-center items-center gap-4 text-zinc-300 font-bold text-sm">
+                    <!-- الرعاة -->
+                    <span class="bg-white/5 py-2 px-6 rounded-xl border border-white/10 hover:border-primary/30 transition-colors shadow-sm">Tariq Labs</span>
+                    <span class="bg-white/5 py-2 px-6 rounded-xl border border-white/10 hover:border-primary/30 transition-colors shadow-sm">تقني بحت</span>
+                    <span class="bg-white/5 py-2 px-6 rounded-xl border border-white/10 hover:border-primary/30 transition-colors shadow-sm text-center">الجمعية العربية الأمريكية للتعليم والتطوير</span>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-xs text-zinc-500">
+                    <span>بالتعاون مع</span>
+                    <span class="text-zinc-400 font-bold">Gaza Sky Geeks</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <!-- Ensure this path resolves correctly based on where you open the file, you might need to adjust it if serving from a different directory -->
+            <img src="public/assets/looogo.png" alt="عربون" class="h-32 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500">
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-white">عُربون</h1>
+        <p class="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto font-medium">
+            ضمانك المالي .. <span class="text-primary font-bold">في العالم الرقمي</span>
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24 space-y-12">
+        
+        <!-- المشكلة والحل -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- المشكلة -->
+            <div class="glass-card rounded-3xl p-8 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-red-500/20 p-3 rounded-2xl text-red-400">
+                        <span class="material-symbols-outlined text-3xl">warning</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">المشكلة</h2>
+                </div>
+                <p class="text-zinc-300 leading-relaxed mb-4 text-lg">
+                    عشان نوضح المشكلة، خليني أحكيلكم قصة حقيقية حصلت لواحد صاحبنا. صاحبنا ده مبرمج ومحاضر شاطر، اتفق مع شخص إنه يديله كورس مكثف أونلاين برا منصات العمل الحر.
+                </p>
+                <p class="text-zinc-300 leading-relaxed mb-4 text-lg">
+                    بعد ما خلص الكورس وسلم الماتيريال كلها، الشخص ده عمله "بلوك" واختفى، وصاحبنا خسر وقته وفلوسه لأن ببساطة.. مفيش أي ضمان أو وسيط مالي يحفظ حقه.
+                </p>
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mt-6">
+                    <p class="text-red-300 font-medium leading-relaxed">
+                        المشكلة دي بتواجه ملايين المستقلين (Freelancers) ومقدمي الخدمات المصغرة في الوطن العربي يومياً؛ أزمة <strong class="text-red-400">"انعدام الثقة"</strong> وغياب الضمان المالي العادل للطرفين.
+                    </p>
+                </div>
+            </div>
+
+            <!-- الحل -->
+            <div class="glass-card rounded-3xl p-8 relative overflow-hidden group emerald-glow">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-primary/20 p-3 rounded-2xl text-primary">
+                        <span class="material-symbols-outlined text-3xl">verified_user</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">الحل</h2>
+                </div>
+                <h3 class="text-2xl font-bold text-primary mb-4">من هنا اتولدت فكرة "عُربون"</h3>
+                <p class="text-zinc-300 leading-relaxed mb-4 text-lg">
+                    الحل بتاعنا هو منصة <strong class="text-white">"عُهدة مالية" (Escrow System)</strong> ذكية ومستقلة. الفكرة ببساطة:
+                </p>
+                <ul class="space-y-4 text-zinc-300 mb-6 text-lg">
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">account_balance</span>
+                        <span>المشتري بيدفع الفلوس، والفلوس بتتجمد في حساب المنصة (عُربون).</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">work</span>
+                        <span>المستقل بيبدأ شغل وهو مطمن 100% إن فلوسه موجودة.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">task_alt</span>
+                        <span>ولما الشغل يتسلم، المشتري بيضغط "تحرير"، والفلوس بتتحول فوراً.</span>
+                    </li>
+                </ul>
+                <div class="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center mt-auto">
+                    <p class="text-primary font-bold text-xl">
+                        حلينا أزمة الثقة، ووفرنا بيئة عمل آمنة تماماً.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- دورة العمل (النموذج الأولي) -->
+        <div class="glass-card rounded-3xl p-8">
+            <div class="flex flex-col items-center mb-10 text-center">
+                <div class="bg-blue-500/20 p-3 rounded-2xl text-blue-400 mb-4 inline-block">
+                    <span class="material-symbols-outlined text-4xl">cycle</span>
+                </div>
+                <h2 class="text-3xl font-bold text-white">النموذج الأولي (MVP) و Demo</h2>
+                <p class="text-zinc-400 mt-2">استعراض دورة العمل</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="bg-[#121718] border border-white/5 rounded-2xl p-6 text-center relative group hover:border-primary/50 transition-colors">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-lg shadow-black/50">1</div>
+                    <h3 class="font-bold text-white text-lg">إنشاء عُهدة مالية</h3>
+                </div>
+                <div class="bg-[#121718] border border-white/5 rounded-2xl p-6 text-center relative group hover:border-primary/50 transition-colors md:mt-4">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-lg shadow-black/50">2</div>
+                    <h3 class="font-bold text-white text-lg">توليد رابط الدفع للمشتري</h3>
+                </div>
+                <div class="bg-[#121718] border border-white/5 rounded-2xl p-6 text-center relative group hover:border-primary/50 transition-colors md:mt-8">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-lg shadow-black/50">3</div>
+                    <h3 class="font-bold text-white text-lg">تجميد الأموال فور الدفع</h3>
+                </div>
+                <div class="bg-[#121718] border border-white/5 rounded-2xl p-6 text-center relative group hover:border-primary/50 transition-colors md:mt-4">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-lg shadow-black/50">4</div>
+                    <h3 class="font-bold text-white text-lg">تحرير الأموال بعد التسليم</h3>
+                </div>
+                <div class="bg-[#121718] border border-white/5 rounded-2xl p-6 text-center relative group hover:border-primary/50 transition-colors">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-lg shadow-black/50">5</div>
+                    <h3 class="font-bold text-white text-lg">حل النزاع</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- مجموعة التكنولوجيا -->
+            <div class="glass-card rounded-3xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-purple-500/20 p-3 rounded-2xl text-purple-400">
+                        <span class="material-symbols-outlined text-3xl">code</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">مجموعة التكنولوجيا</h2>
+                </div>
+                <div class="space-y-4 mt-8">
+                    <div class="flex items-center justify-between bg-[#121718] p-5 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <span class="material-symbols-outlined text-red-500 text-3xl">web</span>
+                            <span class="font-medium text-white text-lg">واجهة المستخدم (Frontend)</span>
+                        </div>
+                        <span class="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl text-md font-bold">Angular</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#121718] p-5 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <span class="material-symbols-outlined text-blue-500 text-3xl">dns</span>
+                            <span class="font-medium text-white text-lg">الخوادم (Backend)</span>
+                        </div>
+                        <span class="px-4 py-2 bg-blue-500/10 text-blue-400 rounded-xl text-md font-bold">ASP.NET Web API</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#121718] p-5 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <span class="material-symbols-outlined text-blue-300 text-3xl">database</span>
+                            <span class="font-medium text-white text-lg">قاعدة البيانات (Database)</span>
+                        </div>
+                        <span class="px-4 py-2 bg-blue-300/10 text-blue-300 rounded-xl text-md font-bold">PostgreSQL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نموذج الأعمال وحجم السوق -->
+            <div class="glass-card rounded-3xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-amber-500/20 p-3 rounded-2xl text-amber-400">
+                        <span class="material-symbols-outlined text-3xl">storefront</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">نموذج الأعمال وحجم السوق</h2>
+                </div>
+                
+                <div class="mb-8 mt-6">
+                    <h3 class="text-white font-bold mb-3 flex items-center gap-2 text-lg">
+                        <span class="material-symbols-outlined text-primary">groups</span>
+                        المستخدمين
+                    </h3>
+                    <p class="text-zinc-300 leading-relaxed text-md bg-[#121718] p-4 rounded-2xl border border-white/5">
+                        المستقلون (Freelancers)، المعلمون بكل الأنواع، مقدمو الخدمات الصغيرة، وكل صاحب عمل حر.
+                    </p>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-white font-bold mb-3 flex items-center gap-2 text-lg">
+                        <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                        تحقيق الأرباح
+                    </h3>
+                    <div class="bg-primary/10 border border-primary/30 rounded-2xl p-5 flex items-center justify-between shadow-inner">
+                        <span class="text-zinc-200 text-lg">عمولة على كل عملية ناجحة</span>
+                        <span class="text-3xl font-black text-primary">2.5%</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-3 flex items-center gap-2 text-lg">
+                        <span class="material-symbols-outlined text-primary">trending_up</span>
+                        حجم السوق
+                    </h3>
+                    <p class="text-zinc-300 leading-relaxed text-md bg-[#121718] p-4 rounded-2xl border border-white/5">
+                        نمو هائل، حيث يتجه العالم أجمع إلى العمل عبر الإنترنت والاعتماد على الحلول الرقمية.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- عرض الاستثمار والتوسع -->
+        <div class="glass-card rounded-3xl p-10 relative overflow-hidden emerald-glow">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+            <div class="flex flex-col items-center text-center mb-10">
+                <div class="bg-primary/20 p-4 rounded-full text-primary mb-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <span class="material-symbols-outlined text-5xl">rocket_launch</span>
+                </div>
+                <h2 class="text-3xl font-bold text-white">عرض الاستثمار والتوسع</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- المبلغ -->
+                <div class="bg-[#121718] border border-white/5 rounded-3xl p-8 text-center flex flex-col justify-center items-center relative overflow-hidden">
+                    <div class="absolute -bottom-10 -right-10 text-primary opacity-5">
+                        <span class="material-symbols-outlined text-9xl">payments</span>
+                    </div>
+                    <span class="text-zinc-400 mb-3 text-lg z-10 relative">المبلغ المطلوب للاستثمار</span>
+                    <span class="text-5xl font-black text-white mb-4 z-10 relative tracking-wider">10,000<span class="text-primary">$</span></span>
+                    <p class="text-zinc-400 text-sm z-10 relative bg-white/5 py-2 px-4 rounded-full">لتوسيع البنية التحتية وتغطية تراخيص الدفع</p>
+                </div>
+
+                <!-- استراتيجية 1 -->
+                <div class="bg-[#121718] border border-white/5 rounded-3xl p-8 relative hover:-translate-y-1 transition-transform">
+                    <div class="mb-4 text-primary">
+                        <span class="material-symbols-outlined text-5xl">account_balance</span>
+                    </div>
+                    <h3 class="font-bold text-white mb-4 text-xl">1. التكامل والدفع</h3>
+                    <p class="text-zinc-400 leading-relaxed text-md">
+                        التكامل مع المحافظ الرقمية وأغلب طرق الدفع المشهورة لتسهيل التعاملات على جميع الأطراف.
+                    </p>
+                </div>
+
+                <!-- استراتيجية 2 -->
+                <div class="bg-[#121718] border border-white/5 rounded-3xl p-8 relative hover:-translate-y-1 transition-transform">
+                    <div class="mb-4 text-primary">
+                        <span class="material-symbols-outlined text-5xl">apartment</span>
+                    </div>
+                    <h3 class="font-bold text-white mb-4 text-xl">2. التوسع وتطوير الأعمال</h3>
+                    <p class="text-zinc-400 leading-relaxed text-md">
+                        توسيع نطاق العمل ليشمل الشركات الناشئة (B2B)، وإطلاق تطبيق مخصص للهواتف الذكية.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- فريق العمل -->
+        <div class="text-center pt-12">
+            <h2 class="text-4xl font-bold text-white mb-12">فريق العمل</h2>
+            <div class="flex flex-wrap justify-center gap-10">
+                <!-- محمد -->
+                <div class="glass-card rounded-3xl p-8 w-full max-w-sm hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-24 h-24 bg-gradient-to-br from-primary to-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-[#09090b]">
+                        <span class="material-symbols-outlined text-4xl text-white">person</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">محمد مصطفى محمود</h3>
+                    <p class="text-zinc-400 text-md mb-6 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm text-primary">location_on</span> مصر
+                    </p>
+                    <div class="bg-[#121718] text-primary font-bold py-3 px-6 rounded-2xl text-lg border border-primary/20 shadow-inner">
+                        فرونت اند (Frontend)
+                    </div>
+                </div>
+
+                <!-- فارس -->
+                <div class="glass-card rounded-3xl p-8 w-full max-w-sm hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg shadow-blue-500/30 border-4 border-[#09090b]">
+                        <span class="material-symbols-outlined text-4xl text-white">person</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">فارس جمال ابراهيم</h3>
+                    <p class="text-zinc-400 text-md mb-6 flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm text-primary">location_on</span> مصر
+                    </p>
+                    <div class="bg-[#121718] text-blue-400 font-bold py-3 px-6 rounded-2xl text-lg border border-blue-500/20 shadow-inner">
+                        باك اند وداتا بيز
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

@@ -28,7 +28,10 @@ public class MappingProfile : Profile
         CreateMap<Dispute, DisputeResponseDto>()
             .ForMember(dest => dest.OpenedBy, opt => opt.MapFrom(src => src.OpenedBy.ToString()))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(dest => dest.Resolution, opt => opt.MapFrom(src => src.Resolution.HasValue ? src.Resolution.Value.ToString() : null));
+            .ForMember(dest => dest.Resolution, opt => opt.MapFrom(src => src.Resolution.HasValue ? src.Resolution.Value.ToString() : null))
+            .ForMember(dest => dest.EscrowTitle, opt => opt.MapFrom(src => src.Escrow != null ? src.Escrow.Title : null))
+            .ForMember(dest => dest.EscrowAmount, opt => opt.MapFrom(src => src.Escrow != null ? src.Escrow.Amount : (decimal?)null))
+            .ForMember(dest => dest.EscrowCurrency, opt => opt.MapFrom(src => src.Escrow != null ? src.Escrow.Currency : null));
         CreateMap<Dispute, DisputeDetailDto>()
             .IncludeBase<Dispute, DisputeResponseDto>();
         CreateMap<DisputeMessage, DisputeMessageDto>()

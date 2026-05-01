@@ -94,7 +94,7 @@ export class EscrowDetailsComponent implements OnInit {
       }).subscribe({
         next: (res) => {
           if (res.success) {
-            this.alertService.success('تم فتح النزاع بنجاح. سيتم توجيهك لمركز النزاعات لمتابعة القضية.');
+            this.alertService.success('تم فتح النزاع thبنجاح. سيتم توجيهك لمركز النزاعات لمتابعة القضية.');
 
             // 2. تحديث الحالة محلياً
             this.escrow.update(e => e ? { ...e, status: 'DISPUTED' } : null);

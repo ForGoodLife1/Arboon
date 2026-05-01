@@ -90,6 +90,8 @@ public class DisputeService : IDisputeService
         _context.Disputes.Add(dispute);
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation("Dispute {DisputeId} opened by buyer for escrow {EscrowId}", dispute.Id, dto.EscrowId);
+
         await DispatchDisputeWebhook("dispute.opened", dispute.Id, escrow);
 
         return _mapper.Map<DisputeResponseDto>(dispute);
@@ -118,13 +120,23 @@ public class DisputeService : IDisputeService
 
     public async Task<DisputeDetailDto> GetByIdAsync(Guid disputeId)
     {
+        _logger.LogInformation("Fetching dispute details for ID: {DisputeId}", disputeId);
+
         var dispute = await _context.Disputes
             .Include(d => d.Escrow)
-            .Include(d => d.Messages.OrderBy(m => m.CreatedAt))
+            .Include(d => d.Messages)
             .FirstOrDefaultAsync(d => d.Id == disputeId)
             ?? throw new DisputeNotFoundException(disputeId);
 
-        return _mapper.Map<DisputeDetailDto>(dispute);
+        var dto = _mapper.Map<DisputeDetailDto>(dispute);
+        
+        // Manual ordering of messages to avoid potential filtered include issues
+        if (dto.Messages != null)
+        {
+            dto.Messages = dto.Messages.OrderBy(m => m.CreatedAt).ToList();
+        }
+
+        return dto;
     }
 
     public async Task<DisputeResponseDto> ResolveAsync(Guid disputeId, ResolveDisputeDto dto)

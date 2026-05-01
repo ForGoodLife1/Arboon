@@ -27,4 +27,13 @@ public class DisputeResponseDto
 
     [JsonPropertyName("resolved_at")]
     public DateTime? ResolvedAt { get; set; }
+
+    [JsonPropertyName("escrow_title")]
+    public string? EscrowTitle { get; set; }
+
+    [JsonPropertyName("escrow_amount")]
+    public decimal? EscrowAmount { get; set; }
+
+    [JsonPropertyName("escrow_currency")]
+    public string? EscrowCurrency { get; set; }
 }
